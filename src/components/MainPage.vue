@@ -17,13 +17,35 @@
             label="Parâmetros"
             label-size="lg"
             label-class="font-weight-bold pt-0"
-            class="mb-0"
+            class="pr-5"
           >
+            <b-form-radio-group
+              class="pt-2 pb-3"
+              v-model="selectedMethod"
+              @input="adjustPercentages()" 
+              :options="methods"
+            ></b-form-radio-group>
+            <b-form-group
+              label-cols-sm="4"
+              label="U.C / Ano Letivo"
+              label-align-sm="right"
+              label-for="uc"
+            >
+              <b-row>
+                <b-col>
+                <b-form-input placeholder="Unidade Curricular" v-model="uc" id="uc"></b-form-input>
+                </b-col>
+                <b-col>
+                <b-form-input v-model="date" id="date"></b-form-input>
+                </b-col>
+              </b-row>
+            </b-form-group>
             <b-form-group
               label-cols-sm="4"
               label="Nomes das Colunas dos Trabalhos"
               label-align-sm="right"
               label-for="nested-street"
+              v-if="selectedMethod == 'Avaliação Prática' || selectedMethod == 'Avaliação Final'"
             >
               <b-form-input :disabled="true" v-model="jobNames" id="nested-street"></b-form-input>
               <b-form-checkbox-group
@@ -39,7 +61,7 @@
               label="Percentagem dos Trabalhos (0-1)"
               label-align-sm="right"
               label-for="nested-city"
-              description = "Default: Cada coluna tem a mesma percentagem"
+              v-if="selectedMethod == 'Avaliação Prática' || selectedMethod == 'Avaliação Final'"
             >
               <b-form-input v-model="jobPercentages" id="nested-city"></b-form-input>
             </b-form-group>
@@ -48,6 +70,7 @@
               label="Nomes das Colunas dos Testes"
               label-align-sm="right"
               label-for="nested-state"
+              v-if="selectedMethod == 'Avaliação Teórica' || selectedMethod == 'Avaliação Final'"
             >
               <b-form-input :disabled="true" v-model="testNames" id="nested-state"></b-form-input>
               <b-form-checkbox-group
@@ -63,7 +86,7 @@
               label="Percentagem dos Testes (0-1)"
               label-align-sm="right"
               label-for="nested-country"
-              description = "Default: Cada coluna tem a mesma percentagem"
+              v-if="selectedMethod == 'Avaliação Teórica' || selectedMethod == 'Avaliação Final'"
             >
               <b-form-input v-model="testPercentages" id="nested-country"></b-form-input>
             </b-form-group>
@@ -72,9 +95,9 @@
               label="Percentagem Final Teórica (0-1)"
               label-align-sm="right"
               label-for="nested-p"
-              description="Default: 0.5"
+              v-if="selectedMethod == 'Avaliação Final'"
             >
-              <b-form-input v-model="p_evaluation_percentage" id="nested-p"></b-form-input>
+              <b-form-input v-model="t_evaluation_percentage" id="nested-p"></b-form-input>
             </b-form-group>
 
             <b-form-group
@@ -82,9 +105,9 @@
               label="Percentagem Final Prática (0-1)"
               label-align-sm="right"
               label-for="nested-t"
-              description = "Default: 0.5"
+              v-if="selectedMethod == 'Avaliação Final'"
             >
-              <b-form-input v-model="t_evaluation_percentage" id="nested-t"></b-form-input>
+              <b-form-input v-model="p_evaluation_percentage" id="nested-t"></b-form-input>
             </b-form-group>
           </b-form-group>
         </b-card>
@@ -95,12 +118,11 @@
       <b-row v-show="meanBoolean" class="pb-3">
         <b-form-group class="mr-auto ml-auto">
           <b-row class="pb-3 ">
-            <label class="font-weight-bold mr-auto ml-auto" for="filename">Nome da Pauta a Gerar (default: pauta_final.csv)</label>
+            <label class="font-weight-bold mr-auto ml-auto" for="filename">Nome da nova Pauta</label>
             <b-form-input id="filename" v-model="filename"></b-form-input>
           </b-row>
           <b-button :disabled="disableDownload" @click="download()" variant="dark">Download</b-button>
         </b-form-group>
-
       </b-row>
   </b-container>
 </template>
@@ -111,7 +133,7 @@ export default {
   data(){
     return {
       csv: null,
-      filename: "pauta_final.csv",
+      filename: "avFinal.csv",
       file: null,
       contents: null,
       selectedJobNames: [],
@@ -126,7 +148,11 @@ export default {
       output: [[]],
       meanBoolean: false,
       separator: ";",
-      windows: false
+      windows: false,
+      uc: "",
+      date: `${new Date().getFullYear()-1}/${new Date().getFullYear()}`,
+      selectedMethod: "Avaliação Final",
+      methods: ['Avaliação Teórica', 'Avaliação Prática', 'Avaliação Final']
     }
   },
   mounted(){
@@ -134,19 +160,83 @@ export default {
       this.windows = true
   },
   methods:{
+    adjustPercentages(){
+      if(this.selectedMethod == 'Avaliação Final'){
+        this.t_evaluation_percentage = 0.5
+        this.p_evaluation_percentage = 0.5
+        this.filename = "avFinal.csv"
+      }else if(this.selectedMethod == 'Avaliação Prática'){
+        this.filename = "avPratica.csv"
+      }else{
+        this.filename = "avTeorica.csv"
+      }
+    },
     calculateMean(){
+      let msg = "final"
+      if(this.selectedMethod == 'Avaliação Final'){
+        this.calculateFinalMean()
+        msg = "final"
+      }else if(this.selectedMethod == 'Avaliação Prática'){
+        this.calculatePraticalMean()
+        msg = "prática"
+      }else{
+        this.calculateTheoricalMean()
+        msg = "teórica"
+      }
+      this.meanBoolean = true
+      this.disableDownload = false
+      this.makeToast(`Pauta ${msg} criada!`, this.meanBoolean)
+    },
+    calculateTheoricalMean(){
+      let tests = this.testNames.split(",")
+      let tests_percentage = this.testPercentages.split(",")
+      this.output.push([`U.C de ${this.uc} - Ano Letivo ${this.date}`])
+      let outputHeaders = [this.csv.headers[0], this.csv.headers[1], "Av. Teórica"]
+      this.output.push(outputHeaders)
+      for(let i=0; i<this.csv[this.csv.headers[0]].length; i++){
+        var mean_t = parseFloat("0")
+        for(let k=0; k<tests.length; k++){
+          if(!isNaN(this.csv[tests[k]][i])){
+            mean_t += parseFloat(this.csv[tests[k]][i]) * parseFloat(tests_percentage[k])
+          }
+        }
+        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], mean_t.toFixed(2)])
+      }
+    },
+    calculatePraticalMean(){
+      let jobs = this.jobNames.split(",")
+      let jobs_percentage = this.jobPercentages.split(",")
+      this.output.push([`U.C de ${this.uc} - Ano Letivo ${this.date}`])
+      let outputHeaders = [this.csv.headers[0], this.csv.headers[1], "Av. Prática"]
+      this.output.push(outputHeaders)
+      for(let i=0; i<this.csv[jobs[0]].length; i++){
+        var mean_p = parseFloat("0")
+        for(let j=0; j<jobs.length; j++){
+          if(this.csv[jobs[j]][i].includes(','))
+            this.csv[jobs[j]][i] = this.csv[jobs[j]][i].replace(',', '.')
+
+          if(!isNaN(this.csv[jobs[j]][i])){
+            mean_p += (parseFloat(this.csv[jobs[j]][i]) * parseFloat(jobs_percentage[j]))
+          }
+        }
+        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], mean_p.toFixed(2)])
+      }
+    },
+    calculateFinalMean(){
       let jobs = this.jobNames.split(",")
       let jobs_percentage = this.jobPercentages.split(",")
       let tests = this.testNames.split(",")
       let tests_percentage = this.testPercentages.split(",")
-      this.csv.theorical = []
-      this.csv.pratical = []
-      let outputHeaders = [this.csv.headers[0], this.csv.headers[1], "Avaliação Prática", "Avaliação Teórica", "Avaliação Final"]
+      this.output.push([`U.C de ${this.uc} - Ano Letivo ${this.date}`])
+      let outputHeaders = [this.csv.headers[0], this.csv.headers[1], "Av. Prática", "Av. Teórica", "Av. Final"]
       this.output.push(outputHeaders)
       for(let i=0; i<this.csv[jobs[0]].length; i++){
         var mean_p = parseFloat("0")
         var mean_t = parseFloat("0")
         for(let j=0; j<jobs.length; j++){
+          if(this.csv[jobs[j]][i].includes(','))
+            this.csv[jobs[j]][i] = this.csv[jobs[j]][i].replace(',', '.')
+
           if(!isNaN(this.csv[jobs[j]][i])){
             mean_p += (parseFloat(this.csv[jobs[j]][i]) * parseFloat(jobs_percentage[j]))
           }
@@ -156,13 +246,10 @@ export default {
             mean_t += parseFloat(this.csv[tests[k]][i]) * parseFloat(tests_percentage[k])
           }
         }
-        let grade = mean_t * parseFloat(this.p_evaluation_percentage) + mean_p * parseFloat(this.t_evaluation_percentage)
-        grade = grade < 9.50 ? grade + " ( R )" : grade.toFixed(2).toString()
-        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], mean_p.toFixed(2).toString(), mean_t.toFixed(2).toString(), grade])
+        let grade = mean_t * parseFloat(this.t_evaluation_percentage) + mean_p * parseFloat(this.p_evaluation_percentage)
+        grade = grade < 9.50 ? grade.toFixed(0) + " (R)" : grade.toFixed(0)
+        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], mean_p.toFixed(2), mean_t.toFixed(2), grade])
       }
-      this.meanBoolean = true
-      this.disableDownload = false
-      this.makeToast("Pauta final criada!", this.meanBoolean)
     },
     refreshInput(input, selected){
         if(input == 'j'){
@@ -353,6 +440,7 @@ export default {
       this.testPercentages = ""
       this.selectedJobNames = []
       this.selectedTestNames = []
+      this.uc = ""
     },
     makeToast(text, flag) {
         let variant = flag ? "success" : "danger"
