@@ -15,7 +15,9 @@
     "iconv-lite": "^0.6.1",
     "jquery": "^3.5.1",
     "vue": "^2.6.11",
-    "vue-csv-import": "^3.3.2"
+    "vue-csv-import": "^3.3.2",
+    "vue-html2pdf": "^1.4.14",
+    "vue-router": "^3.3.4"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",

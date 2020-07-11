@@ -1,14 +1,16 @@
 <template>
-    <MainPage id="app"/>
+  <div id="app">
+    <TopNav/>
+    <router-view></router-view>
+  </div>
 </template>
 
 <script>
-import MainPage from "./components/MainPage.vue";
-
+import TopNav from "./components/TopNav.vue"
 export default {
   name: "App",
   components: {
-    MainPage
+    TopNav
   }
 };
 </script>

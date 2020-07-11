@@ -1,5 +1,5 @@
 <template>
-  <b-container>
+  <b-container class="pt-4">
     <h4 class="text-center pb-3 font-weight-bold">Importar Pautas CSV</h4>
     <b-row class="pb-5">
       <b-form-file
@@ -66,6 +66,15 @@
               <b-form-input v-model="jobPercentages" id="nested-city"></b-form-input>
             </b-form-group>
             <b-form-group
+              label-cols-sm="4"
+              label="Nota Mínima Prática"
+              label-align-sm="right"
+              label-for="pMinGrade"
+              v-if="selectedMethod == 'Avaliação Prática' || selectedMethod == 'Avaliação Final'"
+            >
+              <b-form-input v-model="pMinGrade" id="pMinGrade"></b-form-input>
+            </b-form-group>
+            <b-form-group
              label-cols-sm="4"
               label="Nomes das Colunas dos Testes"
               label-align-sm="right"
@@ -89,6 +98,15 @@
               v-if="selectedMethod == 'Avaliação Teórica' || selectedMethod == 'Avaliação Final'"
             >
               <b-form-input v-model="testPercentages" id="nested-country"></b-form-input>
+            </b-form-group>
+            <b-form-group
+              label-cols-sm="4"
+              label="Nota Mínima Teórica"
+              label-align-sm="right"
+              label-for="tMinGrade"
+              v-if="selectedMethod == 'Avaliação Teórica' || selectedMethod == 'Avaliação Final'"
+            >
+              <b-form-input v-model="tMinGrade" id="nested-tMinGrade"></b-form-input>
             </b-form-group>
             <b-form-group
               label-cols-sm="4"
@@ -152,7 +170,9 @@ export default {
       uc: "",
       date: `${new Date().getFullYear()-1}/${new Date().getFullYear()}`,
       selectedMethod: "Avaliação Final",
-      methods: ['Avaliação Teórica', 'Avaliação Prática', 'Avaliação Final']
+      methods: ['Avaliação Teórica', 'Avaliação Prática', 'Avaliação Final'],
+      tMinGrade: 9.5,
+      pMinGrade: 0
     }
   },
   mounted(){
@@ -193,6 +213,7 @@ export default {
       this.output.push([`U.C de ${this.uc} - Ano Letivo ${this.date}`])
       let outputHeaders = [this.csv.headers[0], this.csv.headers[1], "Av. Teórica"]
       this.output.push(outputHeaders)
+      let grade 
       for(let i=0; i<this.csv[this.csv.headers[0]].length; i++){
         var mean_t = parseFloat("0")
         for(let k=0; k<tests.length; k++){
@@ -200,7 +221,9 @@ export default {
             mean_t += parseFloat(this.csv[tests[k]][i]) * parseFloat(tests_percentage[k])
           }
         }
-        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], mean_t.toFixed(2)])
+
+        grade = mean_t.toFixed(2)
+        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], grade])
       }
     },
     calculatePraticalMean(){
@@ -209,6 +232,8 @@ export default {
       this.output.push([`U.C de ${this.uc} - Ano Letivo ${this.date}`])
       let outputHeaders = [this.csv.headers[0], this.csv.headers[1], "Av. Prática"]
       this.output.push(outputHeaders)
+      let grade
+
       for(let i=0; i<this.csv[jobs[0]].length; i++){
         var mean_p = parseFloat("0")
         for(let j=0; j<jobs.length; j++){
@@ -219,7 +244,10 @@ export default {
             mean_p += (parseFloat(this.csv[jobs[j]][i]) * parseFloat(jobs_percentage[j]))
           }
         }
-        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], mean_p.toFixed(2)])
+
+        grade = mean_p.toFixed(2)
+
+        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], grade])
       }
     },
     calculateFinalMean(){
@@ -230,6 +258,8 @@ export default {
       this.output.push([`U.C de ${this.uc} - Ano Letivo ${this.date}`])
       let outputHeaders = [this.csv.headers[0], this.csv.headers[1], "Av. Prática", "Av. Teórica", "Av. Final"]
       this.output.push(outputHeaders)
+      let pGrade, tGrade, grade
+
       for(let i=0; i<this.csv[jobs[0]].length; i++){
         var mean_p = parseFloat("0")
         var mean_t = parseFloat("0")
@@ -246,9 +276,22 @@ export default {
             mean_t += parseFloat(this.csv[tests[k]][i]) * parseFloat(tests_percentage[k])
           }
         }
-        let grade = mean_t * parseFloat(this.t_evaluation_percentage) + mean_p * parseFloat(this.p_evaluation_percentage)
-        grade = grade < 9.50 ? grade.toFixed(0) + " (R)" : grade.toFixed(0)
-        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], mean_p.toFixed(2), mean_t.toFixed(2), grade])
+
+        if(this.pMinGrade == 0){
+          pGrade = mean_p.toFixed(2)
+        }else{
+          pGrade = mean_p < this.pMinGrade ? mean_p.toFixed(2) + " (R)" : mean_p.toFixed(2)
+        }
+
+        tGrade = mean_t < this.tMinGrade ? mean_t.toFixed(2) + " (R)" : mean_t.toFixed(2)
+        if (isNaN(pGrade) || isNaN(tGrade))
+          grade = "R"
+        else{
+          let aux = (mean_t * parseFloat(this.t_evaluation_percentage) + mean_p * parseFloat(this.p_evaluation_percentage))
+          grade = aux < this.tMinGrade ? aux.toFixed(0) + " (R)" : aux.toFixed(0) 
+        }
+
+        this.output.push([this.csv[this.csv.headers[0]][i], this.csv[this.csv.headers[1]][i], pGrade, tGrade, grade])
       }
     },
     refreshInput(input, selected){
