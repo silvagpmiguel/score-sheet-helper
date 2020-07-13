@@ -37,7 +37,7 @@
                 :items="items"
                 :fields="fields">
               <template v-slot:cell()="data">
-                <div v-if="isNaN(data.value)">{{data.value}}</div>
+                <div v-if="data.field.label == 'Nome'">{{data.value}}</div>
                 <div v-else class="text-center">{{data.value}}</div>
               </template>
               <template v-slot:head()="data">
@@ -65,8 +65,13 @@ export default {
       contents: null,
       file: null,
       filename: "",
-      validFile: false
+      validFile: false,
+      windows: false
     }
+  },
+  mounted(){
+    if(window.navigator.platform.includes("Win"))
+      this.windows = true
   },
   methods:{
     clear(){
@@ -80,7 +85,10 @@ export default {
     readContents(){
       if(this.checkFile()){
         let reader = new FileReader();
-        reader.readAsText(this.file, "UTF-8");
+        if(this.windows)
+          reader.readAsText(new Blob([this.file]), "windows-1252")
+        else
+          reader.readAsText(new Blob([this.file]), "UTF-8")
         reader.onloadend =  evt => {
           this.contents = evt.target.result;
         } 
@@ -98,7 +106,6 @@ export default {
       return arr[1].split(',').length > arr[0].split(";").length ? "," : ";"
     },
     transformCSV(){
-        this.filename = this.file.name.substring(0, this.file.name.length-4)
         let arr = this.contents.split("\n")
         let separator = this.checkSeparator(arr)
         this.title = arr[0]
@@ -110,13 +117,12 @@ export default {
                 json[this.fields[j]] = aux[j]
             this.items.push(json)
         }
-        this.filename = this.file.name
     },
     checkFile(){
       let file = this.file ? true : false;
 
       if(file && this.file.name.endsWith(".csv")){
-        this.filename = this.file.name.substring(0,this.file.name.length-4) +".pdf"
+        this.filename = this.file.name.substring(0,this.file.name.length-4)
         this.makeToast(`Ficheiro ${this.filename} pronto a converter`, true)
         this.validFile = true
       }

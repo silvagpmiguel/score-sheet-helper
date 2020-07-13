@@ -433,7 +433,7 @@ export default {
 
       if(file && this.file.name.endsWith(".csv")){
           let reader = new FileReader();
-          reader.readAsText(this.file, "UTF-8");
+          reader.readAsText(new Blob([this.file]), "UTF-8");
           reader.onload =  evt => {
             this.contents = evt.target.result;
             this.transformJSON()
