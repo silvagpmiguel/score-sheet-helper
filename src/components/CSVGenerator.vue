@@ -133,21 +133,34 @@
     <b-row class="pb-3">
       <b-button class="mr-auto ml-auto" v-show="!meanBoolean" :disabled="(testNames == '' || testPercentages == '') && (jobNames == '' || jobPercentages == '')" @click="calculateMean()" variant="dark">Calcular Media</b-button>
     </b-row>
-      <b-row v-show="meanBoolean" class="pb-3">
-        <b-form-group class="mr-auto ml-auto">
-          <b-row class="pb-3 ">
-            <label class="font-weight-bold mr-auto ml-auto" for="filename">Nome da nova Pauta</label>
-            <b-form-input id="filename" v-model="filename"></b-form-input>
-          </b-row>
-          <b-button :disabled="disableDownload" @click="download()" variant="dark">Download</b-button>
-        </b-form-group>
-      </b-row>
+    <b-row class="pb-3 mr-auto ml-auto" v-show="meanBoolean">
+          <b-col class="pr-5">
+            <label class="font-weight-bold mr-auto ml-auto" for="filename">Nome da Pauta CSV</label>
+            <div class="pb-2">
+              <b-form-input class="text-center" id="filename" v-model="filename"></b-form-input>
+            </div>
+            <b-button :disabled="csvGenerated" @click="downloadCSV()" variant="dark">Download CSV</b-button>
+          </b-col>
+        <b-col class="pl-5">
+          <label class="font-weight-bold mr-auto ml-auto" for="filename2">Nome da Pauta PDF</label>
+          <div class="pb-2">
+            <b-form-input class="text-center" id="filename2" v-model="filename2"></b-form-input>
+          </div>
+          <b-button :disabled="pdfGenerated" @click="downloadPDF()" variant="dark">Download PDF</b-button>
+        </b-col>
+    </b-row>
+    <PDFVue :isGenerated="pdfGenerated" :filename="filename2" :title="title" :items="items" :fields="fields"/>
   </b-container>
 </template>
 
 <script>
+import PDFVue from './PDFVue'
+
 export default {
   name: "MainPage",
+  components:{
+    PDFVue
+  },
   data(){
     return {
       csv: null,
@@ -160,7 +173,6 @@ export default {
       jobPercentages: "",
       testNames: "",
       testPercentages: "",
-      disableDownload: true,
       t_evaluation_percentage: 0.5,
       p_evaluation_percentage: 0.5,
       output: [[]],
@@ -172,7 +184,16 @@ export default {
       selectedMethod: "Avaliação Final",
       methods: ['Avaliação Teórica', 'Avaliação Prática', 'Avaliação Final'],
       tMinGrade: 9.5,
-      pMinGrade: 0
+      pMinGrade: 0,
+      out: [],
+      csvGenerated: false,
+
+      // PDF
+      items: [],
+      fields: [],
+      title: "",
+      pdfGenerated: false,
+      filename2: ""
     }
   },
   mounted(){
@@ -204,7 +225,8 @@ export default {
         msg = "teórica"
       }
       this.meanBoolean = true
-      this.disableDownload = false
+      this.filename2 = this.filename.substring(0,this.filename.length-4)
+      this.prepareCSVForDownload()
       this.makeToast(`Pauta ${msg} criada!`, this.meanBoolean)
     },
     calculateTheoricalMean(){
@@ -453,26 +475,62 @@ export default {
     },
     prepareCSVForDownload(){
       if(this.separator == ",")
-        this.output = this.output.map(e => e.join(",")).join("\n").trim()
+        this.out = this.output.map(e => e.join(",")).join("\n").trim()
       else
-        this.output = this.output.map(e => e.join(",")).join("\n").replace(/,/g, ";").trim()
+        this.out = this.output.map(e => e.join(",")).join("\n").replace(/,/g, ";").trim()
     },
-    download(){ 
+    transformCSVToPDF(){
+        let arr = this.out.split("\n")
+        this.title = arr[0]
+        this.fields = arr[1].split(this.separator)
+        for(let i = 2; i<arr.length; i++){
+            let aux = arr[i].split(this.separator)
+            let json = {}
+            for(let j = 0; j < aux.length; j++)
+                json[this.fields[j]] = aux[j]
+            this.items.push(json)
+        }
+    },
+    downloadCSV(){ 
       let iconv = require('iconv-lite');
       let FileSaver = require('file-saver')
       let encode = "text/csv;charset=utf-8"
-      this.prepareCSVForDownload()
-      let out = this.output
 
       if(this.windows){
-        out = iconv.encode(this.output, 'win1252')
+        this.out = iconv.encode(this.out, 'win1252')
         encode = "text/csv;charset=win1252"
       }
 
-      let blob = new Blob([out], {type: encode})
+      let blob = new Blob([this.out], {type: encode})
       FileSaver.saveAs(blob, this.filename)
+      this.csvGenerated = true
+      this.clearCSVDependencies()
 
-      this.meanBoolean = false
+    },
+    downloadPDF(){
+      this.transformCSVToPDF()
+      this.pdfGenerated = true
+    },
+    clear(){
+      this.fields = []
+      this.items = []
+      this.filename2 = ""
+      if(this.pdfGenerated && this.csvGenerated){
+        this.out = []
+        this.meanBoolean = false
+        this.pdfGenerated = false
+        this.csvGenerated = false
+      }
+
+    },
+    clearCSVDependencies(){
+      if(this.pdfGenerated && this.csvGenerated){
+        this.out = []
+        this.meanBoolean = false
+        this.pdfGenerated = false
+        this.csvGenerated = false
+      }
+      
       this.output = [[]]
       this.contents = null
       this.file = null
@@ -484,6 +542,7 @@ export default {
       this.selectedJobNames = []
       this.selectedTestNames = []
       this.uc = ""
+      this.filename = "avFinal.csv"
     },
     makeToast(text, flag) {
         let variant = flag ? "success" : "danger"
@@ -491,7 +550,7 @@ export default {
         this.$bvToast.toast(text, {
           title: title,
           variant: variant,
-          autoHideDelay: 5000
+          autoHideDelay: 3000
         })
     }
   }

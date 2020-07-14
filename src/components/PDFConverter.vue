@@ -1,62 +1,33 @@
 <template>
     <b-container class="pt-4"> 
-        <h4 class="text-center pb-3 font-weight-bold">Importar CSV do Gerador de Pautas</h4>
-        <b-row class="pb-4">
-            <b-form-file
-            v-model="file"
-            :state="validFile"
-            @input="readContents()"
-            placeholder="Choose a file or drop it here..."
-            drop-placeholder="Drop file here..."
-            class="w-50 mr-auto ml-auto"
-            ></b-form-file>
-        </b-row>
-        <div v-show="validFile" class="pb-3">
-          <label class="font-weight-bold" for="filename">Nome da nova Pauta</label>
-          <b-form-input class="ml-auto mr-auto w-50 text-center" id="filename" v-model="filename"></b-form-input>
-        </div>
-        <b-button @click="generatePDF()" :disabled="this.file==null" variant="dark">Converter em PDF</b-button>
-        <vue-html2pdf
-        :show-layout="false"
-        :enable-download="true"
-        :preview-modal="false"
-        :paginate-elements-by-height="800"
-        :filename="filename"
-        :pdf-quality="2"
-        pdf-content-width="1124px"
-        pdf-format="a3"
-        pdf-orientation="portrait"
-        @hasGenerated="clear()"
-        ref="html2Pdf">
-            <section slot="pdf-content" class="pl-1 pr-1">
-                <h4 class="mt-3 pb-2 text-center font-weight-bold">{{title ? title : ""}}</h4>
-                <b-table 
-                class=""
-                striped
-                head-row-variant="none"
-                :items="items"
-                :fields="fields">
-              <template v-slot:cell()="data">
-                <div v-if="data.field.label == 'Nome'">{{data.value}}</div>
-                <div v-else class="text-center">{{data.value}}</div>
-              </template>
-              <template v-slot:head()="data">
-                <div v-if="data.label == 'Nome'">{{data.label}}</div>
-                <div v-else class="text-center">{{data.label}}</div>
-              </template>
-                </b-table>
-                <div class="pl-2 pt-3">
-                  <span class="font-weight-bold">Docente: </span>Sância Maria Afonso Pires
-                </div>
-            </section>
-        </vue-html2pdf>
+      <h4 class="text-center pb-3 font-weight-bold">Importar CSV do Gerador de Pautas</h4>
+      <b-row class="pb-4">
+          <b-form-file
+          v-model="file"
+          :state="validFile"
+          @input="readContents()"
+          placeholder="Choose a file or drop it here..."
+          drop-placeholder="Drop file here..."
+          class="w-50 mr-auto ml-auto"
+          ></b-form-file>
+      </b-row>
+      <div v-show="validFile" class="pb-3">
+        <label class="font-weight-bold" for="filename">Nome da nova Pauta</label>
+        <b-form-input class="ml-auto mr-auto w-50 text-center" id="filename" v-model="filename"></b-form-input>
+      </div>
+      <b-button @click="generatePDF()" :disabled="file==null" variant="dark">Converter em PDF</b-button>
+      <PDFVue :isGenerated="isGenerated" :filename="filename" :title="title" :items="items" :fields="fields"/>
   </b-container>
 </template>
 
 <script>
+import PDFVue from "./PDFVue.vue"
 
 export default {
   name: "PDFConverter",
+  components:{
+    PDFVue
+  },
   data(){
     return {
       title: "",
@@ -66,7 +37,8 @@ export default {
       file: null,
       filename: "",
       validFile: false,
-      windows: false
+      windows: false,
+      isGenerated: false
     }
   },
   mounted(){
@@ -78,9 +50,10 @@ export default {
         this.contents = null
         this.items = []
         this.fields = []
-        this.title = []
+        this.title = ""
         this.filename = ""
         this.validFile = false
+        this.isGenerated = false
     },
     readContents(){
       if(this.checkFile()){
@@ -100,7 +73,7 @@ export default {
     generatePDF(){
         this.transformCSV()
         this.file = null
-        this.$refs.html2Pdf.generatePdf()
+        this.isGenerated = true
     },
     checkSeparator(arr){
       return arr[1].split(',').length > arr[0].split(";").length ? "," : ";"
@@ -142,7 +115,7 @@ export default {
         this.$bvToast.toast(text, {
           title: title,
           variant: variant,
-          autoHideDelay: 5000
+          autoHideDelay: 3000
         })
     }
   }
