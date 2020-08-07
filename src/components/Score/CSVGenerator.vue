@@ -422,7 +422,7 @@ export default {
       if (file && !isValid) {
         this.file = null;
         file = false;
-        this.makeToast("Erro. Deve importar um ficheiro .CSV");
+        this.makeToast("Erro. Deve importar um ficheiro .csv ou .xlsx");
       }
       return file;
     },

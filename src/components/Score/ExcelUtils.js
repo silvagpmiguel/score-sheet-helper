@@ -201,51 +201,5 @@ export default {
       }
     }
     return newStruct;
-  },
-  checkFile(file, contents) {
-    let notEmptyFile = file ? true : false;
-    let isValid = false;
-
-    if (notEmptyFile && file.name.endsWith(".csv")) {
-      isValid = true;
-      const reader = new FileReader();
-      reader.onload = evt => {
-        contents = evt.target.result;
-        this.transformJSON(contents);
-        file = null;
-      };
-      reader.onerror = evt => {
-        console.error(evt);
-      };
-      reader.readAsText(new Blob([file]), "UTF-8");
-    } else if (notEmptyFile && file.name.endsWith(".xlsx")) {
-      isValid = true;
-      const reader = new FileReader();
-      const XLSX = require("xlsx");
-      reader.onload = evt => {
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetsList = workbook.SheetNames;
-        contents = XLSX.utils
-          .sheet_to_csv(workbook.Sheets[sheetsList[0]], {
-            header: 1,
-            defval: "",
-            blankrows: false
-          })
-          .replace(/"/g, "");
-        this.transformJSON(contents);
-        file = null;
-      };
-      reader.onerror = evt => {
-        console.error(evt);
-      };
-      reader.readAsArrayBuffer(new Blob([file]));
-    }
-    if (notEmptyFile && !isValid) {
-      file = null;
-      notEmptyFile = false;
-    }
-
-    return notEmptyFile;
   }
 };
