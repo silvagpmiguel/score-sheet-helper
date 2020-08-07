@@ -233,9 +233,11 @@
 <script>
 import PDFVue from "../PDF/PDFVue.vue";
 import utils from "./ExcelUtils.js";
+import Mixin from "../mixins/mixin.js";
 
 export default {
   name: "MainPage",
+  mixins: [Mixin],
   components: {
     PDFVue
   },
@@ -244,8 +246,6 @@ export default {
       /** Score */
       csv: null,
       filename: "avFinal.csv",
-      file: null,
-      contents: null,
       selectedJobNames: [],
       selectedTestNames: [],
       jobNames: "",
@@ -256,8 +256,6 @@ export default {
       p_evaluation_percentage: 0.5,
       output: [[]],
       meanBoolean: false,
-      separator: ";",
-      windows: false,
       uc: "",
       date: `${new Date().getFullYear() - 1}/${new Date().getFullYear()}`,
       selectedMethod: "Avaliação Final",
@@ -265,18 +263,10 @@ export default {
       tMinGrade: 9.5,
       pMinGrade: 0,
       out: [],
-      csvGenerated: false,
+      csvGenerated: false
 
-      /** PDF */
-      items: [],
-      fields: [],
-      title: "",
-      pdfGenerated: false,
-      filename2: ""
+      /** WINDOWS & PDF OPTIONS ARE DECLARED IN THE MIXIN */
     };
-  },
-  mounted() {
-    if (window.navigator.platform.includes("Win")) this.windows = true;
   },
   methods: {
     adjustPercentages() {
@@ -357,15 +347,11 @@ export default {
         this.testPercentages = all.join();
       }
     },
-    checkSeparator(arr) {
-      return arr[0].split(",").length > arr[0].split(";").length ? "," : ";";
-    },
     transformJSON() {
       if (this.csv && this.csv.files && this.csv.files.includes(this.file.name))
         return;
 
       let arr = this.contents.trim().split("\n");
-      this.separator = this.checkSeparator(arr);
       utils.orderById(arr);
       let header = arr[0].split(this.separator);
 
@@ -389,6 +375,7 @@ export default {
         const reader = new FileReader();
         reader.onload = evt => {
           this.contents = evt.target.result;
+          this.separator = this.checkSeparator(this.contents);
           this.transformJSON();
           this.file = null;
         };
@@ -439,17 +426,6 @@ export default {
           .replace(/,/g, ";")
           .trim();
     },
-    transformCSVToPDF() {
-      let arr = this.out.split("\n");
-      this.title = arr[0];
-      this.fields = arr[1].split(this.separator);
-      for (let i = 2; i < arr.length; i++) {
-        let aux = arr[i].split(this.separator);
-        let json = {};
-        for (let j = 0; j < aux.length; j++) json[this.fields[j]] = aux[j];
-        this.items.push(json);
-      }
-    },
     downloadCSV() {
       let iconv = require("iconv-lite");
       let FileSaver = require("file-saver");
@@ -466,7 +442,7 @@ export default {
       this.clearCSVDependencies();
     },
     downloadPDF() {
-      this.transformCSVToPDF();
+      this.transformCSVToPDF(this.out);
       this.pdfGenerated = true;
     },
     clear() {
@@ -500,15 +476,6 @@ export default {
       this.selectedTestNames = [];
       this.uc = "";
       this.filename = "avFinal.csv";
-    },
-    makeToast(text, flag) {
-      let variant = flag ? "success" : "danger";
-      let title = flag ? "Sucesso" : "Erro";
-      this.$bvToast.toast(text, {
-        title: title,
-        variant: variant,
-        autoHideDelay: 5000
-      });
     }
   }
 };

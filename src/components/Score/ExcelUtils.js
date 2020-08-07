@@ -38,9 +38,7 @@ export default {
             parseFloat(csv[jobs[j]][i]) * parseFloat(jobs_percentage[j]);
         }
       }
-
       grade = mean_p.toFixed(2);
-
       output.push([csv[csv.headers[0]][i], csv[csv.headers[1]][i], grade]);
     }
   },

@@ -18,15 +18,15 @@
       <b-form-input
         class="ml-auto mr-auto w-50 text-center"
         id="filename"
-        v-model="filename"
+        v-model="filename2"
       ></b-form-input>
     </div>
     <b-button @click="generatePDF()" :disabled="file == null" variant="dark"
       >Converter em PDF</b-button
     >
     <PDFVue
-      :isGenerated="isGenerated"
-      :filename="filename"
+      :isGenerated="pdfGenerated"
+      :filename="filename2"
       :title="title"
       :items="items"
       :fields="fields"
@@ -36,27 +36,19 @@
 
 <script>
 import PDFVue from "./PDFVue.vue";
+import Mixin from "../mixins/mixin.js";
 
 export default {
   name: "PDFConverter",
+  mixins: [Mixin],
   components: {
     PDFVue
   },
   data() {
     return {
-      title: "",
-      fields: [],
-      items: [],
-      contents: null,
-      file: null,
-      filename: "",
-      validFile: false,
-      windows: false,
-      isGenerated: false
+      /** WINDOWS & PDF OPTIONS ARE DECLARED IN THE MIXIN */
+      validFile: false
     };
-  },
-  mounted() {
-    if (window.navigator.platform.includes("Win")) this.windows = true;
   },
   methods: {
     clear() {
@@ -64,9 +56,9 @@ export default {
       this.items = [];
       this.fields = [];
       this.title = "";
-      this.filename = "";
+      this.filename2 = "";
       this.validFile = false;
-      this.isGenerated = false;
+      this.pdfGenerated = false;
     },
     readContents() {
       if (this.checkFile()) {
@@ -76,6 +68,7 @@ export default {
         else reader.readAsText(new Blob([this.file]), "UTF-8");
         reader.onloadend = evt => {
           this.contents = evt.target.result;
+          this.separator = this.checkSeparator(this.contents);
         };
         reader.onerror = evt => {
           console.error(evt);
@@ -83,31 +76,16 @@ export default {
       }
     },
     generatePDF() {
-      this.transformCSV();
+      this.transformCSVToPDF(this.contents);
+      this.pdfGenerated = true;
       this.file = null;
-      this.isGenerated = true;
-    },
-    checkSeparator(arr) {
-      return arr[1].split(",").length > arr[0].split(";").length ? "," : ";";
-    },
-    transformCSV() {
-      let arr = this.contents.split("\n");
-      let separator = this.checkSeparator(arr);
-      this.title = arr[0];
-      this.fields = arr[1].split(separator);
-      for (let i = 2; i < arr.length; i++) {
-        let aux = arr[i].split(separator);
-        let json = {};
-        for (let j = 0; j < aux.length; j++) json[this.fields[j]] = aux[j];
-        this.items.push(json);
-      }
     },
     checkFile() {
       let file = this.file ? true : false;
 
       if (file && this.file.name.endsWith(".csv")) {
-        this.filename = this.file.name.substring(0, this.file.name.length - 4);
-        this.makeToast(`Ficheiro ${this.filename} pronto a converter`, true);
+        this.filename2 = this.file.name.substring(0, this.file.name.length - 4);
+        this.makeToast(`Ficheiro ${this.filename2} pronto a converter`, true);
         this.validFile = true;
       }
 
@@ -119,15 +97,6 @@ export default {
       }
 
       return this.validFile;
-    },
-    makeToast(text, flag) {
-      let variant = flag ? "success" : "danger";
-      let title = flag ? "Sucesso" : "Erro";
-      this.$bvToast.toast(text, {
-        title: title,
-        variant: variant,
-        autoHideDelay: 3000
-      });
     }
   }
 };
