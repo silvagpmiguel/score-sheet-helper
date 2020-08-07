@@ -40,7 +40,7 @@ import PDFVue from "./PDFVue.vue";
 export default {
   name: "PDFConverter",
   components: {
-    PDFVue,
+    PDFVue
   },
   data() {
     return {
@@ -52,7 +52,7 @@ export default {
       filename: "",
       validFile: false,
       windows: false,
-      isGenerated: false,
+      isGenerated: false
     };
   },
   mounted() {
@@ -74,10 +74,10 @@ export default {
         if (this.windows)
           reader.readAsText(new Blob([this.file]), "windows-1252");
         else reader.readAsText(new Blob([this.file]), "UTF-8");
-        reader.onloadend = (evt) => {
+        reader.onloadend = evt => {
           this.contents = evt.target.result;
         };
-        reader.onerror = (evt) => {
+        reader.onerror = evt => {
           console.error(evt);
         };
       }
@@ -126,10 +126,10 @@ export default {
       this.$bvToast.toast(text, {
         title: title,
         variant: variant,
-        autoHideDelay: 3000,
+        autoHideDelay: 3000
       });
-    },
-  },
+    }
+  }
 };
 </script>
 

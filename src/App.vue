@@ -10,8 +10,8 @@ import TopNav from "./components/TopNav.vue";
 export default {
   name: "App",
   components: {
-    TopNav,
-  },
+    TopNav
+  }
 };
 </script>
 

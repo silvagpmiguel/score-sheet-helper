@@ -1,8 +1,8 @@
 <template>
   <b-navbar type="dark" variant="dark">
     <b-navbar-nav>
-      <b-nav-item to="/">CSV Merger and PDF Conversor</b-nav-item>
-      <b-nav-item to="/generateCSV">Generate CSV</b-nav-item>
+      <b-nav-item to="/">Excel Merger and PDF Conversor</b-nav-item>
+      <b-nav-item to="/generateCSV">Generate Score</b-nav-item>
       <b-nav-item to="/convertToPDF">Convert CSV to PDF</b-nav-item>
     </b-navbar-nav>
   </b-navbar>
@@ -10,7 +10,7 @@
 
 <script>
 export default {
-  name: "TopNav",
+  name: "TopNav"
 };
 </script>
 
