@@ -233,10 +233,10 @@
 <script>
 import PDFVue from "../PDF/PDFVue.vue";
 import utils from "./ExcelUtils.js";
-import Mixin from "../mixins/mixin.js";
+import Mixin from "../../mixins/mixin.js";
 
 export default {
-  name: "MainPage",
+  name: "CSVGenerator",
   mixins: [Mixin],
   components: {
     PDFVue

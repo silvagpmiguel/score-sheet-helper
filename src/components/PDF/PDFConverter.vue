@@ -36,7 +36,7 @@
 
 <script>
 import PDFVue from "./PDFVue.vue";
-import Mixin from "../mixins/mixin.js";
+import Mixin from "../../mixins/mixin.js";
 
 export default {
   name: "PDFConverter",

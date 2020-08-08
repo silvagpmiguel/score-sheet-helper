@@ -26,7 +26,6 @@ export default {
         for (let j = 0; j < aux.length; j++) json[this.fields[j]] = aux[j];
         this.items.push(json);
       }
-      console.log(this.items);
     },
     checkSeparator(contents) {
       return contents.split(",").length > contents.split(";").length
