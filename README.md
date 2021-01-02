@@ -1,4 +1,4 @@
-# Score Helper
+# Score Sheet Helper
 
 This project is aimed for teachers with the purpose of building score sheets.
 
