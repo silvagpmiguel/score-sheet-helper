@@ -19,6 +19,9 @@
           <b-form-group label-cols-sm="4" label="Título">
             <b-form-input v-model="title"></b-form-input>
           </b-form-group>
+          <b-form-group label-cols-sm="4" label="Nome do Docente">
+            <b-form-input v-model="teacher"></b-form-input>
+          </b-form-group>
           <b-form-group label-cols-sm="4" label="Nome do Ficheiro">
             <b-form-input v-model="filename"></b-form-input>
           </b-form-group>
@@ -86,7 +89,7 @@
           </b-container>
           <b-container>
             <b-button
-              :disabled="items.length == 0"
+              :disabled="items.length == 0 || teacher.length == 0"
               variant="info"
               class="mr-2"
               size="sm"
@@ -94,7 +97,7 @@
               >Download CSV</b-button
             >
             <b-button
-              :disabled="items.length == 0"
+              :disabled="items.length == 0 || teacher.length == 0"
               variant="primary"
               size="sm"
               @click="downloadPDF()"
@@ -124,6 +127,9 @@
             ></b-form-input>
           </template>
         </b-table>
+        <div class="text-left">
+          <span class="font-weight-bold">Docente: </span>{{ teacher }}
+        </div>
       </b-col>
     </b-row>
     <PDFVue
@@ -132,6 +138,7 @@
       :title="title"
       :items="items"
       :fields="computedFields"
+      :teacher="teacher"
     />
   </b-container>
 </template>
@@ -178,9 +185,10 @@ export default {
       tPercent: 0.5,
       pPercent: 0.5,
       filename: 'pauta',
-      title: 'Pauta',
+      title: 'U.C de A - Ano Letivo B/C',
       windows: false,
       separator: ',',
+      teacher: '',
     }
   },
   methods: {

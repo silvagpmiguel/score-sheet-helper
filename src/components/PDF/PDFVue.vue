@@ -30,9 +30,7 @@
             <div v-else class="text-center">{{ data.label }}</div>
           </template>
         </b-table>
-        <div class="pl-1 pt-1">
-          <span class="font-weight-bold">Docente: </span>{{ teacher }}
-        </div>
+        <span class="font-weight-bold">Docente: </span>{{ teacher }}
       </section>
     </vue-html2pdf>
   </div>
