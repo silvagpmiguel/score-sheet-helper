@@ -6,22 +6,28 @@
 </template>
 
 <script>
-import TopNav from "./components/TopNav.vue";
+import TopNav from './components/TopNav.vue'
 export default {
-  name: "App",
+  name: 'App',
   components: {
-    TopNav
-  }
-};
+    TopNav,
+  },
+}
 </script>
 
 <style>
+html,
+body {
+  overflow-x: hidden;
+  background-color: whitesmoke;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 2rem;
+  background-color: whitesmoke;
 }
 </style>

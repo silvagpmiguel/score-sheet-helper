@@ -1,8 +1,9 @@
 <template>
   <b-navbar type="dark" variant="dark">
-    <b-navbar-nav>
-      <b-nav-item to="/">Excel Merger and PDF Conversor</b-nav-item>
-      <b-nav-item to="/generateCSV">Generate Score</b-nav-item>
+    <b-navbar-brand>Score Helper</b-navbar-brand>
+    <b-navbar-nav class="ml-auto">
+      <b-nav-item to="/createScore">Create Score</b-nav-item>
+      <b-nav-item to="/generateCSV">Import & Generate Score</b-nav-item>
       <b-nav-item to="/convertToPDF">Convert CSV to PDF</b-nav-item>
     </b-navbar-nav>
   </b-navbar>
@@ -10,8 +11,8 @@
 
 <script>
 export default {
-  name: "TopNav"
-};
+  name: 'TopNav',
+}
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

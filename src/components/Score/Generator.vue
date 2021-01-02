@@ -11,10 +11,15 @@
       ></b-form-file>
     </b-row>
     <b-container v-show="!meanBoolean" class="pb-3">
-      <b-card bg-variant="light">
+      <b-card
+        header="Parâmetros"
+        header-bg-variant="secondary"
+        header-text-variant="light"
+        body-bg-variant="dark"
+        body-text-variant="light"
+      >
         <b-form-group
           label-cols-lg="2"
-          label="Parâmetros"
           label-size="lg"
           label-class="font-weight-bold pt-0"
           class="pr-5"
@@ -51,7 +56,7 @@
             label-for="nested-street"
             v-if="
               selectedMethod == 'Avaliação Prática' ||
-                selectedMethod == 'Avaliação Final'
+              selectedMethod == 'Avaliação Final'
             "
           >
             <b-form-input
@@ -74,7 +79,7 @@
             label-for="nested-city"
             v-if="
               selectedMethod == 'Avaliação Prática' ||
-                selectedMethod == 'Avaliação Final'
+              selectedMethod == 'Avaliação Final'
             "
           >
             <b-form-input
@@ -89,7 +94,7 @@
             label-for="pMinGrade"
             v-if="
               selectedMethod == 'Avaliação Prática' ||
-                selectedMethod == 'Avaliação Final'
+              selectedMethod == 'Avaliação Final'
             "
           >
             <b-form-input v-model="pMinGrade" id="pMinGrade"></b-form-input>
@@ -101,7 +106,7 @@
             label-for="nested-state"
             v-if="
               selectedMethod == 'Avaliação Teórica' ||
-                selectedMethod == 'Avaliação Final'
+              selectedMethod == 'Avaliação Final'
             "
           >
             <b-form-input
@@ -124,7 +129,7 @@
             label-for="nested-country"
             v-if="
               selectedMethod == 'Avaliação Teórica' ||
-                selectedMethod == 'Avaliação Final'
+              selectedMethod == 'Avaliação Final'
             "
           >
             <b-form-input
@@ -139,7 +144,7 @@
             label-for="tMinGrade"
             v-if="
               selectedMethod == 'Avaliação Teórica' ||
-                selectedMethod == 'Avaliação Final'
+              selectedMethod == 'Avaliação Final'
             "
           >
             <b-form-input
@@ -181,7 +186,7 @@
         v-show="!meanBoolean"
         :disabled="
           (testNames == '' || testPercentages == '') &&
-            (jobNames == '' || jobPercentages == '')
+          (jobNames == '' || jobPercentages == '')
         "
         @click="calculateMean()"
         variant="dark"
@@ -189,10 +194,13 @@
       >
     </b-row>
     <b-row class="pb-3 mr-auto ml-auto" v-show="meanBoolean">
+      <b-container class="pb-3">
+        <label class="font-weight-bold">Nome do Docente</label>
+        <b-form-input class="text-center" v-model="teacher"></b-form-input>
+      </b-container>
+
       <b-col class="pr-5">
-        <label class="font-weight-bold mr-auto ml-auto" for="filename"
-          >Nome da Pauta CSV</label
-        >
+        <label class="font-weight-bold" for="filename">Nome da Pauta CSV</label>
         <div class="pb-2">
           <b-form-input
             class="text-center"
@@ -200,12 +208,15 @@
             v-model="filename"
           ></b-form-input>
         </div>
-        <b-button :disabled="csvGenerated" @click="downloadCSV()" variant="dark"
+        <b-button
+          :disabled="teacher.length == 0"
+          @click="downloadCSV()"
+          variant="dark"
           >Download CSV</b-button
         >
       </b-col>
       <b-col class="pl-5">
-        <label class="font-weight-bold mr-auto ml-auto" for="filename2"
+        <label class="font-weight-bold" for="filename2"
           >Nome da Pauta PDF</label
         >
         <div class="pb-2">
@@ -215,74 +226,80 @@
             v-model="filename2"
           ></b-form-input>
         </div>
-        <b-button :disabled="pdfGenerated" @click="downloadPDF()" variant="dark"
+        <b-button
+          :disabled="teacher.length == 0"
+          @click="downloadPDF()"
+          variant="dark"
           >Download PDF</b-button
         >
       </b-col>
     </b-row>
     <PDFVue
-      :isGenerated="pdfGenerated"
+      ref="pdf"
       :filename="filename2"
       :title="title"
       :items="items"
+      :teacher="teacher"
       :fields="fields"
     />
   </b-container>
 </template>
 
 <script>
-import PDFVue from "../PDF/PDFVue.vue";
-import utils from "./ExcelUtils.js";
-import Mixin from "../../mixins/mixin.js";
+import PDFVue from '../PDF/PDFVue.vue'
+import utils from './utils.js'
+import Mixin from '../../mixins/mixin.js'
 
 export default {
-  name: "CSVGenerator",
+  name: 'Generator',
   mixins: [Mixin],
   components: {
-    PDFVue
+    PDFVue,
   },
   data() {
     return {
       /** Score */
       csv: null,
-      filename: "avFinal.csv",
+      filename: 'avFinal.csv',
       selectedJobNames: [],
       selectedTestNames: [],
-      jobNames: "",
-      jobPercentages: "",
-      testNames: "",
-      testPercentages: "",
+      jobNames: '',
+      jobPercentages: '',
+      testNames: '',
+      testPercentages: '',
       t_evaluation_percentage: 0.5,
       p_evaluation_percentage: 0.5,
       output: [[]],
       meanBoolean: false,
-      uc: "",
+      uc: '',
       date: `${new Date().getFullYear() - 1}/${new Date().getFullYear()}`,
-      selectedMethod: "Avaliação Final",
-      methods: ["Avaliação Teórica", "Avaliação Prática", "Avaliação Final"],
+      selectedMethod: 'Avaliação Final',
+      methods: ['Avaliação Teórica', 'Avaliação Prática', 'Avaliação Final'],
       tMinGrade: 9.5,
       pMinGrade: 0,
       out: [],
-      csvGenerated: false
+      csvGenerated: false,
+      pdfGenerated: false,
+      teacher: '',
 
       /** WINDOWS & PDF OPTIONS ARE DECLARED IN THE MIXIN */
-    };
+    }
   },
   methods: {
     adjustPercentages() {
-      if (this.selectedMethod == "Avaliação Final") {
-        this.t_evaluation_percentage = 0.5;
-        this.p_evaluation_percentage = 0.5;
-        this.filename = "avFinal.csv";
-      } else if (this.selectedMethod == "Avaliação Prática") {
-        this.filename = "avPratica.csv";
+      if (this.selectedMethod == 'Avaliação Final') {
+        this.t_evaluation_percentage = 0.5
+        this.p_evaluation_percentage = 0.5
+        this.filename = 'avFinal.csv'
+      } else if (this.selectedMethod == 'Avaliação Prática') {
+        this.filename = 'avPratica.csv'
       } else {
-        this.filename = "avTeorica.csv";
+        this.filename = 'avTeorica.csv'
       }
     },
     calculateMean() {
-      let msg = "final";
-      if (this.selectedMethod == "Avaliação Final") {
+      let msg = 'final'
+      if (this.selectedMethod == 'Avaliação Final') {
         utils.calculateFinalMean(
           this.jobNames,
           this.jobPercentages,
@@ -296,9 +313,9 @@ export default {
           this.tMinGrade,
           this.t_evaluation_percentage,
           this.p_evaluation_percentage
-        );
-        msg = "final";
-      } else if (this.selectedMethod == "Avaliação Prática") {
+        )
+        msg = 'final'
+      } else if (this.selectedMethod == 'Avaliação Prática') {
         utils.calculatePraticalMean(
           this.jobNames,
           this.jobPercentages,
@@ -306,8 +323,8 @@ export default {
           this.date,
           this.output,
           this.csv
-        );
-        msg = "prática";
+        )
+        msg = 'prática'
       } else {
         utils.calculateTheoricalMean(
           this.testNames,
@@ -316,172 +333,165 @@ export default {
           this.date,
           this.csv,
           this.output
-        );
-        msg = "teórica";
+        )
+        msg = 'teórica'
       }
-      this.meanBoolean = true;
-      this.filename2 = this.filename.substring(0, this.filename.length - 4);
-      this.prepareCSVForDownload();
-      this.makeToast(`Pauta ${msg} criada!`, this.meanBoolean);
+      this.meanBoolean = true
+      this.filename2 = this.filename.substring(0, this.filename.length - 4)
+      this.prepareCSVForDownload()
+      this.makeToast(`Pauta ${msg} criada!`, this.meanBoolean)
     },
     refreshInput(input, selected) {
-      if (input == "j") {
-        this.jobNames = selected.join();
-        let all = selected.slice();
+      if (input == 'j') {
+        this.jobNames = selected.join()
+        let all = selected.slice()
         let perc = parseFloat(1 / all.length)
           .toFixed(2)
-          .toString();
+          .toString()
         for (let i = 0; i < all.length; i++) {
-          all[i] = perc;
+          all[i] = perc
         }
-        this.jobPercentages = all.join();
+        this.jobPercentages = all.join()
       } else {
-        this.testNames = selected.join();
-        let all = selected.slice();
+        this.testNames = selected.join()
+        let all = selected.slice()
         let perc = parseFloat(1 / all.length)
           .toFixed(2)
-          .toString();
+          .toString()
         for (let i = 0; i < all.length; i++) {
-          all[i] = perc;
+          all[i] = perc
         }
-        this.testPercentages = all.join();
+        this.testPercentages = all.join()
       }
     },
     transformJSON() {
       if (this.csv && this.csv.files && this.csv.files.includes(this.file.name))
-        return;
+        return
 
-      let arr = this.contents.trim().split("\n");
-      utils.orderById(arr);
-      let header = arr[0].split(this.separator);
+      let arr = this.contents.trim().split('\n')
+      utils.orderById(arr)
+      let header = arr[0].split(this.separator)
 
       if (this.csv) {
-        this.csv.files.push(this.file.name);
-        utils.updateJSON(arr, header, this.csv, this.separator);
+        this.csv.files.push(this.file.name)
+        utils.updateJSON(arr, header, this.csv, this.separator)
       } else {
-        this.csv = {};
-        this.csv.files = [this.file.name];
-        utils.createJSON(arr, header, this.csv, this.separator);
+        this.csv = {}
+        this.csv.files = [this.file.name]
+        utils.createJSON(arr, header, this.csv, this.separator)
       }
 
-      this.makeToast(this.file.name + " lido com sucesso!", true);
+      this.makeToast(this.file.name + ' lido com sucesso!', true)
     },
     checkFile() {
-      let file = this.file ? true : false;
-      let isValid = false;
+      let file = this.file ? true : false
+      let isValid = false
 
-      if (file && this.file.name.endsWith(".csv")) {
-        isValid = true;
-        const reader = new FileReader();
-        reader.onload = evt => {
-          this.contents = evt.target.result;
-          this.separator = this.checkSeparator(this.contents);
-          this.transformJSON();
-          this.file = null;
-        };
-        reader.onerror = evt => {
-          console.error(evt);
-        };
-        reader.readAsText(new Blob([this.file]), "UTF-8");
-      } else if (file && this.file.name.endsWith(".xlsx")) {
-        isValid = true;
-        const reader = new FileReader();
-        const XLSX = require("xlsx");
-        reader.onload = evt => {
-          const data = new Uint8Array(evt.target.result);
-          const workbook = XLSX.read(data, { type: "array" });
-          const sheetsList = workbook.SheetNames;
+      if (file && this.file.name.endsWith('.csv')) {
+        isValid = true
+        const reader = new FileReader()
+        reader.onload = (evt) => {
+          this.contents = evt.target.result
+          this.separator = this.checkSeparator(this.contents)
+          this.transformJSON()
+          this.file = null
+        }
+        reader.onerror = (evt) => {
+          console.error(evt)
+        }
+        reader.readAsText(new Blob([this.file]), 'UTF-8')
+      } else if (file && this.file.name.endsWith('.xlsx')) {
+        isValid = true
+        const reader = new FileReader()
+        const XLSX = require('xlsx')
+        reader.onload = (evt) => {
+          const data = new Uint8Array(evt.target.result)
+          const workbook = XLSX.read(data, { type: 'array' })
+          const sheetsList = workbook.SheetNames
           this.contents = XLSX.utils
             .sheet_to_csv(workbook.Sheets[sheetsList[0]], {
               header: 1,
-              defval: "",
-              blankrows: false
+              defval: '',
+              blankrows: false,
             })
-            .replace(/"/g, "");
-          this.transformJSON();
-          this.file = null;
-        };
-        reader.onerror = evt => {
-          console.error(evt);
-        };
-        reader.readAsArrayBuffer(new Blob([this.file]));
+            .replace(/"/g, '')
+          this.transformJSON()
+          this.file = null
+        }
+        reader.onerror = (evt) => {
+          console.error(evt)
+        }
+        reader.readAsArrayBuffer(new Blob([this.file]))
       }
       if (file && !isValid) {
-        this.file = null;
-        file = false;
-        this.makeToast("Erro. Deve importar um ficheiro .csv ou .xlsx");
+        this.file = null
+        file = false
+        this.makeToast('Erro. Deve importar um ficheiro .csv ou .xlsx')
       }
-      return file;
+      return file
     },
     prepareCSVForDownload() {
-      if (this.separator == ",")
-        this.out = this.output
-          .map(e => e.join(","))
-          .join("\n")
-          .trim();
-      else
-        this.out = this.output
-          .map(e => e.join(","))
-          .join("\n")
-          .replace(/,/g, ";")
-          .trim();
+      this.out = this.output
+        .map((e) => e.join(this.separator))
+        .join('\n')
+        .trim()
     },
     downloadCSV() {
-      let iconv = require("iconv-lite");
-      let FileSaver = require("file-saver");
-      let encode = "text/csv;charset=utf-8";
+      let iconv = require('iconv-lite')
+      let FileSaver = require('file-saver')
+      let encode = 'text/csv;charset=utf-8'
+      let encodedOutput = this.out
 
       if (this.windows) {
-        this.out = iconv.encode(this.out, "win1252");
-        encode = "text/csv;charset=win1252";
+        encodedOutput = iconv.encode(this.out, 'win1252')
+        encode = 'text/csv;charset=win1252'
       }
 
-      let blob = new Blob([this.out], { type: encode });
-      FileSaver.saveAs(blob, this.filename);
-      this.csvGenerated = true;
-      this.clearCSVDependencies();
+      let blob = new Blob([encodedOutput], { type: encode })
+      FileSaver.saveAs(blob, this.filename)
+      this.csvGenerated = true
+      this.clearCSVDependencies()
     },
     downloadPDF() {
-      this.transformCSVToPDF(this.out);
-      this.pdfGenerated = true;
+      this.transformCSVToPDF(this.out)
+      this.pdfGenerated = true
+      this.$refs.pdf.generatePDF()
     },
     clear() {
-      this.fields = [];
-      this.items = [];
-      this.filename2 = "";
+      this.fields = []
+      this.items = []
+      this.filename2 = ''
       if (this.pdfGenerated && this.csvGenerated) {
-        this.out = [];
-        this.meanBoolean = false;
-        this.pdfGenerated = false;
-        this.csvGenerated = false;
+        this.out = []
+        this.meanBoolean = false
+        this.pdfGenerated = false
+        this.csvGenerated = false
       }
     },
     clearCSVDependencies() {
       if (this.pdfGenerated && this.csvGenerated) {
-        this.out = [];
-        this.meanBoolean = false;
-        this.pdfGenerated = false;
-        this.csvGenerated = false;
+        this.out = []
+        this.meanBoolean = false
+        this.pdfGenerated = false
+        this.csvGenerated = false
       }
 
-      this.output = [[]];
-      this.contents = null;
-      this.file = null;
-      this.csv = null;
-      this.jobNames = "";
-      this.jobPercentages = "";
-      this.testNames = "";
-      this.testPercentages = "";
-      this.selectedJobNames = [];
-      this.selectedTestNames = [];
-      this.uc = "";
-      this.filename = "avFinal.csv";
-    }
-  }
-};
+      this.output = [[]]
+      this.contents = null
+      this.file = null
+      this.csv = null
+      this.jobNames = ''
+      this.jobPercentages = ''
+      this.testNames = ''
+      this.testPercentages = ''
+      this.selectedJobNames = []
+      this.selectedTestNames = []
+      this.uc = ''
+      this.filename = 'avFinal.csv'
+    },
+  },
+}
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style>
 h4 {
   text-align: center;
