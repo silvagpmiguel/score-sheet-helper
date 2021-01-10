@@ -13,26 +13,28 @@
       @hasGenerated="$parent.clear()"
       ref="html2Pdf"
     >
-      <section slot="pdf-content" class="pl-1 pr-1">
-        <h3 class="mt-3 pb-2 text-center font-weight-bold">{{ title }}</h3>
-        <b-table
-          thead-class="bg-dark text-white"
-          :items="items"
-          :fields="fields"
-          borderless
-          striped
-        >
-          <template v-slot:cell()="data">
-            <div v-if="data.field.label == 'Nome'">{{ data.value }}</div>
-            <div v-else class="text-center">{{ data.value }}</div>
-          </template>
-          <template v-slot:head()="data">
-            <div v-if="data.label == 'Nome'">{{ data.label }}</div>
-            <div v-else class="text-center">{{ data.label }}</div>
-          </template>
-        </b-table>
-        <div class="docente">
-          <span class="font-weight-bold">Docente: </span>{{ teacher }}
+      <section slot="pdf-content">
+        <div class="ml-1 mr-1">
+          <h4 class="text-center font-weight-bold">{{ title }}</h4>
+          <b-table
+            thead-class="bg-dark text-white"
+            :items="items"
+            :fields="fields"
+            borderless
+            striped
+          >
+            <template v-slot:cell()="data">
+              <div v-if="data.field.label == 'Nome'">{{ data.value }}</div>
+              <div v-else class="text-center">{{ data.value }}</div>
+            </template>
+            <template v-slot:head()="data">
+              <div v-if="data.label == 'Nome'">{{ data.label }}</div>
+              <div v-else class="text-center">{{ data.label }}</div>
+            </template>
+          </b-table>
+          <div class="docente2">
+            <span class="font-weight-bold">Docente: </span>{{ teacher }}
+          </div>
         </div>
       </section>
     </vue-html2pdf>
@@ -57,4 +59,9 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.docente2 {
+  text-align: left;
+  font-size: 1rem;
+}
+</style>

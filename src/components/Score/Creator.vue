@@ -107,13 +107,12 @@
           ><b-icon icon="trash" variant="light"></b-icon
         ></b-button>
         <b-button
-          :disabled="items.length == 0 || teacher.length == 0"
           variant="primary"
           class="mr-2 mb-1"
           size="sm"
-          @click="hideFinal()"
+          @click="popColumn()"
           v-b-tooltip.hover
-          title="Remover Av. Final"
+          title="Remover Última Coluna"
           ><b-icon icon="arrow-left"></b-icon>
         </b-button>
         <b-button
@@ -244,6 +243,9 @@ export default {
     }
   },
   methods: {
+    popColumn() {
+      this.fields.pop()
+    },
     resetTable() {
       this.items = [
         {
