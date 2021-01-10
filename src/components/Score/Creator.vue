@@ -9,22 +9,23 @@
         header="Definições da Pauta"
       >
         <b-form-radio-group
-          class="pb-2"
+          size="sm"
+          class="pb-1"
           v-model="selectedOption"
           :options="options"
         >
         </b-form-radio-group>
-        <b-form-group label-size="sm" label-cols-sm="3" label="Título">
+        <b-form-group label-cols-sm="3" label="Título">
           <b-form-input size="sm" v-model="title"></b-form-input>
         </b-form-group>
-        <b-form-group label-size="sm" label-cols-sm="3" label="Docente">
+        <b-form-group label-cols-sm="3" label="Docente">
           <b-form-input size="sm" v-model="teacher"></b-form-input>
         </b-form-group>
-        <b-form-group label-size="sm" label-cols-sm="3" label="Ficheiro">
+        <b-form-group label-cols-sm="3" label="Ficheiro">
           <b-form-input size="sm" v-model="filename"></b-form-input>
         </b-form-group>
         <div v-show="selectedOption != 't'">
-          <b-form-group label-size="sm" label-cols-sm="3" label="P(Cols)">
+          <b-form-group label-cols-sm="3" label="P(Cols)">
             <b-form-spinbutton
               size="sm"
               v-model="colsP"
@@ -33,7 +34,7 @@
               inline
             ></b-form-spinbutton>
           </b-form-group>
-          <b-form-group label-size="sm" label-cols-sm="3" label="P(%)">
+          <b-form-group label-cols-sm="3" label="P(%)">
             <b-form-spinbutton
               size="sm"
               v-model="pPercent"
@@ -44,12 +45,12 @@
               inline
             ></b-form-spinbutton>
           </b-form-group>
-          <b-form-group label-size="sm" label-cols-sm="3" label="P(Min)">
+          <b-form-group label-cols-sm="3" label="P(Min)">
             <b-form-input size="sm" v-model="pMin"></b-form-input>
           </b-form-group>
         </div>
         <div v-show="selectedOption != 'p'">
-          <b-form-group label-size="sm" label-cols-sm="3" label="T(Cols)">
+          <b-form-group label-cols-sm="3" label="T(Cols)">
             <b-form-spinbutton
               size="sm"
               v-model="colsT"
@@ -58,7 +59,7 @@
               inline
             ></b-form-spinbutton>
           </b-form-group>
-          <b-form-group label-size="sm" label-cols-sm="3" label="T(%)">
+          <b-form-group label-cols-sm="3" label="T(%)">
             <b-form-spinbutton
               size="sm"
               v-model="tPercent"
@@ -69,12 +70,12 @@
               inline
             ></b-form-spinbutton>
           </b-form-group>
-          <b-form-group label-size="sm" label-cols-sm="3" label="T(Min)">
+          <b-form-group label-cols-sm="3" label="T(Min)">
             <b-form-input size="sm" v-model="tMin"></b-form-input>
           </b-form-group>
         </div>
         <div v-show="selectedOption == 'f'">
-          <b-form-group label-size="sm" label-cols-sm="3" label="Decisão">
+          <b-form-group label-cols-sm="3" label="Decisão">
             <b-form-input size="sm" v-model="decision"></b-form-input>
           </b-form-group>
         </div>
@@ -452,11 +453,17 @@ export default {
   },
 }
 </script>
-<style scoped>
+<style>
+span,
+.col-form-label,
+input {
+  font-size: 0.75rem !important;
+}
+
 .container-left {
   position: fixed;
   left: 0;
-  top: 6rem;
+  top: 2.535rem;
   width: 20vw;
 }
 .container-right {
@@ -467,9 +474,11 @@ export default {
 button {
   border: none;
 }
+.form-group {
+  margin-bottom: 0.25rem;
+}
 .card-body {
-  padding: 1rem;
-  padding-top: 0.5rem;
+  padding: 0.25vh 0.4vw 0.25vh 0vw;
 }
 input {
   text-align: center;
