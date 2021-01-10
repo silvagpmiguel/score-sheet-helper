@@ -333,12 +333,10 @@ export default {
           this.addRow()
         }
         for (let k = 0; k < values.length && k < this.fields.length; k++) {
-          console.log(this.items[i][this.fields[j]['key']], values[k])
           this.items[i][this.fields[j++]['key']] = values[k]
         }
         i++
       }
-      console.log(this.items)
     },
     refreshRow(cell) {
       if (cell.value.includes('  ') || cell.value.includes('\t')) {
