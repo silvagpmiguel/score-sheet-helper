@@ -23,28 +23,6 @@
         <b-form-group label-size="sm" label-cols-sm="3" label="Ficheiro">
           <b-form-input size="sm" v-model="filename"></b-form-input>
         </b-form-group>
-        <div v-show="selectedOption != 'p'">
-          <b-form-group label-size="sm" label-cols-sm="3" label="T(Cols)">
-            <b-form-spinbutton
-              size="sm"
-              v-model="colsT"
-              min="1"
-              max="4"
-              inline
-            ></b-form-spinbutton>
-          </b-form-group>
-          <b-form-group label-size="sm" label-cols-sm="3" label="T(%)">
-            <b-form-spinbutton
-              size="sm"
-              v-model="tPercent"
-              min="0.1"
-              max="1"
-              step="0.1"
-              @change="refreshFinalAv()"
-              inline
-            ></b-form-spinbutton>
-          </b-form-group>
-        </div>
         <div v-show="selectedOption != 't'">
           <b-form-group label-size="sm" label-cols-sm="3" label="P(Cols)">
             <b-form-spinbutton
@@ -62,9 +40,42 @@
               min="0.1"
               max="1.0"
               step="0.1"
-              @change="refreshFinalAv()"
+              @input="refreshFinalAv()"
               inline
             ></b-form-spinbutton>
+          </b-form-group>
+          <b-form-group label-size="sm" label-cols-sm="3" label="P(Min)">
+            <b-form-input size="sm" v-model="pMin"></b-form-input>
+          </b-form-group>
+        </div>
+        <div v-show="selectedOption != 'p'">
+          <b-form-group label-size="sm" label-cols-sm="3" label="T(Cols)">
+            <b-form-spinbutton
+              size="sm"
+              v-model="colsT"
+              min="1"
+              max="4"
+              inline
+            ></b-form-spinbutton>
+          </b-form-group>
+          <b-form-group label-size="sm" label-cols-sm="3" label="T(%)">
+            <b-form-spinbutton
+              size="sm"
+              v-model="tPercent"
+              min="0.1"
+              max="1"
+              step="0.1"
+              @input="refreshFinalAv()"
+              inline
+            ></b-form-spinbutton>
+          </b-form-group>
+          <b-form-group label-size="sm" label-cols-sm="3" label="T(Min)">
+            <b-form-input size="sm" v-model="tMin"></b-form-input>
+          </b-form-group>
+        </div>
+        <div v-show="selectedOption == 'f'">
+          <b-form-group label-size="sm" label-cols-sm="3" label="Decisão">
+            <b-form-input size="sm" v-model="decision"></b-form-input>
           </b-form-group>
         </div>
         <div>
@@ -140,7 +151,7 @@
           <b-form-input
             v-model="data.item[data.field.key]"
             class="no-border"
-            @input="refreshRow(data)"
+            @blur="refreshRow(data)"
             :disabled="data.field.key.slice(-1) == 'F'"
           ></b-form-input>
         </template>
@@ -214,6 +225,10 @@ export default {
       windows: false,
       separator: ',',
       teacher: '',
+      tMin: 9.5,
+      pMin: 9.5,
+      fMin: 9.5,
+      decision: 'Recurso',
     }
   },
   methods: {
@@ -270,35 +285,65 @@ export default {
       const index = this.fields.findIndex((item) => item.key == lastKey)
       this.fields.splice(index, 1)
     },
+    round(num, decimal) {
+      const num2 = Math.pow(10, decimal)
+      return isNaN(num) ? num : Math.round(num * num2) / num2
+    },
     computeMean(item, type) {
-      let mean = 0
-      let len = 0
+      let mean = 0,
+        len = 0
+      let str = ''
+      let nan = true
 
       for (let key in item) {
         let val = item[key]
-        if (val >= 0 && key[2] == type && key[3] != 'F') {
-          mean += Number(val)
-          len++
+        if (key[2] == type && key[3] != 'F') {
+          if (isNaN(val)) {
+            str = val
+            len++
+          } else if (val >= 0) {
+            mean += Number(val)
+            nan = false
+            len++
+          }
         }
       }
-
-      return mean / len
+      return nan ? str : this.round(mean / len, 1)
     },
     refreshRow(cell) {
+      const item = cell.item
+      let avtf = 0.0,
+        avpf = 0.0
       switch (this.selectedOption) {
         case 'p': {
-          cell.item.avPF = this.computeMean(cell.item, 'P')
+          cell.item.avPF = this.round(this.computeMean(item, 'P'), 0)
           break
         }
         case 't': {
-          cell.item.avTF = this.computeMean(cell.item, 'T')
+          cell.item.avTF = this.round(this.computeMean(item, 'T'), 0)
           break
         }
         case 'f': {
-          cell.item.avTF = this.computeMean(cell.item, 'T')
-          cell.item.avPF = this.computeMean(cell.item, 'P')
+          avtf = this.computeMean(item, 'T')
+          avpf = this.computeMean(item, 'P')
+          cell.item.avTF = this.round(avtf, 0)
+          cell.item.avPF = this.round(avpf, 0)
+          avtf = isNaN(avtf) ? 0.0 : avtf
+          avpf = isNaN(avpf) ? 0.0 : avpf
+
+          if (avtf < this.tMin || avpf < this.pMin) {
+            cell.item.avF = this.decision
+            break
+          }
+
+          cell.item.avF = this.round(
+            avtf * this.tPercent + avpf * this.pPercent,
+            0
+          )
           cell.item.avF =
-            cell.item.avTF * this.tPercent + cell.item.avPF * this.pPercent
+            cell.item.avF < this.fMin
+              ? cell.item.avF + `(${this.decision})`
+              : cell.item.avF
           break
         }
       }
@@ -372,13 +417,14 @@ export default {
         this.fields = [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Nome' },
-          { key: 'avT1', label: 'Av. Teórica 1' },
-          { key: 'avTF', label: 'Av. Teórica Final' },
           { key: 'avP1', label: 'Av. Prática 1' },
           { key: 'avPF', label: 'Av. Prática Final' },
+          { key: 'avT1', label: 'Av. Teórica 1' },
+          { key: 'avTF', label: 'Av. Teórica Final' },
           { key: 'avF', label: 'Av. Final' },
         ]
       }
+      this.resetTable()
     },
     colsT: function (after, before) {
       const lastKey = `avT${before}`
@@ -410,7 +456,7 @@ export default {
 .container-left {
   position: fixed;
   left: 0;
-  top: 30vh;
+  top: 6rem;
   width: 20vw;
 }
 .container-right {
