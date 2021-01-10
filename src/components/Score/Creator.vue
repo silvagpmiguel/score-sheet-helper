@@ -328,7 +328,7 @@ export default {
       let i = index
       for (let line of arr) {
         let j = 0
-        let values = line.split(/\t|[ ]+/)
+        let values = line.split(/\t|[ ]{2,}/)
         if (i >= len) {
           this.addRow()
         }
