@@ -243,6 +243,7 @@ export default {
     }
   },
   methods: {
+    clear() {},
     popColumn() {
       this.fields.pop()
     },

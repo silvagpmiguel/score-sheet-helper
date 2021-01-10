@@ -4,17 +4,16 @@
       :show-layout="false"
       :enable-download="true"
       :preview-modal="false"
-      :paginate-elements-by-height="800"
       :filename="filename"
-      :pdf-quality="2"
-      pdf-content-width="1120px"
+      :paginate-elements-by-height="1600"
+      pdf-content-width="100%"
       pdf-format="a3"
       pdf-orientation="portrait"
       @hasGenerated="$parent.clear()"
       ref="html2Pdf"
     >
       <section slot="pdf-content">
-        <div class="ml-1 mr-1">
+        <div class="pt-1 pl-1 pr-3">
           <h4 class="text-center font-weight-bold">{{ title }}</h4>
           <b-table
             thead-class="bg-dark text-white"
