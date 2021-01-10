@@ -16,11 +16,11 @@
       <section slot="pdf-content" class="pl-1 pr-1">
         <h3 class="mt-3 pb-2 text-center font-weight-bold">{{ title }}</h3>
         <b-table
-          striped
-          head-variant="dark"
+          thead-class="bg-dark text-white"
           :items="items"
           :fields="fields"
           borderless
+          striped
         >
           <template v-slot:cell()="data">
             <div v-if="data.field.label == 'Nome'">{{ data.value }}</div>
@@ -31,7 +31,9 @@
             <div v-else class="text-center">{{ data.label }}</div>
           </template>
         </b-table>
-        <span class="font-weight-bold">Docente: </span>{{ teacher }}
+        <div class="docente">
+          <span class="font-weight-bold">Docente: </span>{{ teacher }}
+        </div>
       </section>
     </vue-html2pdf>
   </div>

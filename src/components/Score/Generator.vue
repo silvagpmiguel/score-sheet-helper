@@ -3,6 +3,7 @@
     <h4 class="text-center pb-2 font-weight-bold">Importar Pautas Excel</h4>
     <b-row class="pb-3">
       <b-form-file
+        size="sm"
         v-model="file"
         :state="checkFile()"
         placeholder="Choose/Drop csv/xlxs file..."
@@ -17,21 +18,16 @@
         header-text-variant="light"
         body-bg-variant="dark"
         body-text-variant="light"
-        class="mr-auto ml-auto"
+        class="generator-card"
       >
-        <b-form-group
-          label-cols-lg="2"
-          label-size="sm"
-          label-class="font-weight-bold"
-          class="adjust-middle"
-        >
-          <b-form-radio-group
-            size="sm"
-            class="pb-2"
-            v-model="selectedMethod"
-            @input="adjustPercentages()"
-            :options="methods"
-          ></b-form-radio-group>
+        <b-form-radio-group
+          size="sm"
+          class="pb-2"
+          v-model="selectedMethod"
+          @input="adjustPercentages()"
+          :options="methods"
+        ></b-form-radio-group>
+        <div class="adjust-right">
           <b-form-group
             label-size="sm"
             label-cols-sm="4"
@@ -201,7 +197,7 @@
               id="nested-t"
             ></b-form-input>
           </b-form-group>
-        </b-form-group>
+        </div>
         <b-button
           size="sm"
           v-show="!meanBoolean"
@@ -210,7 +206,8 @@
             (jobNames == '' || jobPercentages == '')
           "
           @click="calculateMean()"
-          variant="light"
+          class="mt-2 mb-2"
+          variant="primary"
           >Calcular Media</b-button
         >
       </b-card>
@@ -225,15 +222,17 @@
         <label class="font-weight-bold" for="filename">Nome da Pauta CSV</label>
         <div class="pb-2">
           <b-form-input
+            size="sm"
             class="text-center"
             id="filename"
             v-model="filename"
           ></b-form-input>
         </div>
         <b-button
+          size="sm"
           :disabled="teacher.length == 0"
           @click="downloadCSV()"
-          variant="dark"
+          variant="primary"
           >Download CSV</b-button
         >
       </b-col>
@@ -243,15 +242,17 @@
         >
         <div class="pb-2">
           <b-form-input
+            size="sm"
             class="text-center"
             id="filename2"
             v-model="filename2"
           ></b-form-input>
         </div>
         <b-button
+          size="sm"
           :disabled="teacher.length == 0"
           @click="downloadPDF()"
-          variant="dark"
+          variant="primary"
           >Download PDF</b-button
         >
       </b-col>
@@ -515,17 +516,15 @@ export default {
 }
 </script>
 <style>
+.generator-card {
+  width: 40rem;
+  margin-left: auto;
+  margin-right: auto;
+}
 h4 {
   text-align: center;
 }
-.adjust-middle {
-  padding-right: 10rem;
-}
-.form-group {
-  margin-bottom: 0.75rem;
-}
-
-.card-body {
-  padding: 0.75rem;
+.adjust-right {
+  padding-right: 1rem;
 }
 </style>

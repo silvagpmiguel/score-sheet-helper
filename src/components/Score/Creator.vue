@@ -79,55 +79,63 @@
             <b-form-input size="sm" v-model="decision"></b-form-input>
           </b-form-group>
         </div>
-        <div>
-          <b-button
-            size="sm"
-            variant="primary"
-            class="mr-2 mb-1"
-            @click="addRow()"
-            v-b-tooltip.hover
-            title="Adicionar Linha"
-            ><b-icon icon="arrow-down" variant="light"></b-icon>
-          </b-button>
-          <b-button
-            size="sm"
-            variant="primary"
-            class="mr-2 mb-1"
-            @click="deleteLastRow()"
-            v-b-tooltip.hover.bottom
-            title="Remover Linha"
-            ><b-icon icon="arrow-up" variant="light"></b-icon>
-          </b-button>
-          <b-button
-            size="sm"
-            variant="primary"
-            class="mr-2 mb-1"
-            @click="resetTable()"
-            v-b-tooltip.hover
-            title="Reset Table"
-            ><b-icon icon="trash" variant="light"></b-icon
-          ></b-button>
-          <b-button
-            :disabled="items.length == 0 || teacher.length == 0"
-            variant="primary"
-            class="mr-2 mb-1"
-            size="sm"
-            @click="downloadCSV()"
-            v-b-tooltip.hover
-            title="Download CSV"
-            ><b-icon icon="file-text"></b-icon>
-          </b-button>
-          <b-button
-            class="mr-2 mb-1"
-            :disabled="items.length == 0 || teacher.length == 0"
-            variant="primary"
-            size="sm"
-            v-b-tooltip.hover
-            title="Download PDF"
-            @click="downloadPDF()"
-            ><b-icon icon="file-ppt"></b-icon>
-          </b-button>
-        </div>
+        <b-button
+          size="sm"
+          variant="primary"
+          class="mr-2 mb-1"
+          @click="addRow()"
+          v-b-tooltip.hover
+          title="Adicionar Linha"
+          ><b-icon icon="arrow-down" variant="light"></b-icon>
+        </b-button>
+        <b-button
+          size="sm"
+          variant="primary"
+          class="mr-2 mb-1"
+          @click="deleteLastRow()"
+          v-b-tooltip.hover.bottom
+          title="Remover Linha"
+          ><b-icon icon="arrow-up" variant="light"></b-icon>
+        </b-button>
+        <b-button
+          size="sm"
+          variant="primary"
+          class="mr-2 mb-1"
+          @click="resetTable()"
+          v-b-tooltip.hover
+          title="Reset Table"
+          ><b-icon icon="trash" variant="light"></b-icon
+        ></b-button>
+        <b-button
+          :disabled="items.length == 0 || teacher.length == 0"
+          variant="primary"
+          class="mr-2 mb-1"
+          size="sm"
+          @click="hideFinal()"
+          v-b-tooltip.hover
+          title="Remover Av. Final"
+          ><b-icon icon="arrow-left"></b-icon>
+        </b-button>
+        <b-button
+          class="mr-2 mb-1"
+          :disabled="items.length == 0 || teacher.length == 0"
+          variant="primary"
+          size="sm"
+          v-b-tooltip.hover
+          title="Download CSV"
+          @click="downloadCSV()"
+          ><b-icon icon="file-text"></b-icon>
+        </b-button>
+        <b-button
+          class="mr-2 mb-1"
+          :disabled="items.length == 0 || teacher.length == 0"
+          variant="primary"
+          size="sm"
+          v-b-tooltip.hover
+          title="Download PDF"
+          @click="downloadPDF()"
+          ><b-icon icon="file-ppt"></b-icon>
+        </b-button>
       </b-card>
     </div>
     <div class="container-right">
@@ -149,15 +157,18 @@
           />
         </template>
         <template #cell()="data">
-          <b-form-input
+          <b-form-textarea
+            no-auto-shrink
+            no-resize
+            size="sm"
             v-model="data.item[data.field.key]"
             class="no-border"
             @blur="refreshRow(data)"
             :disabled="data.field.key.slice(-1) == 'F'"
-          ></b-form-input>
+          ></b-form-textarea>
         </template>
       </b-table>
-      <div class="text-left">
+      <div class="docente">
         <span class="font-weight-bold">Docente: </span>{{ teacher }}
       </div>
     </div>
@@ -311,7 +322,30 @@ export default {
       }
       return nan ? str : this.round(mean / len, 1)
     },
+    splitValues(index, value) {
+      const arr = value.split('\n')
+      const len = this.items.length
+      let i = index
+      for (let line of arr) {
+        let j = 0
+        let values = line.split(/\t|[ ]+/)
+        if (i >= len) {
+          this.addRow()
+        }
+        for (let k = 0; k < values.length && k < this.fields.length; k++) {
+          console.log(this.items[i][this.fields[j]['key']], values[k])
+          this.items[i][this.fields[j++]['key']] = values[k]
+        }
+        i++
+      }
+      console.log(this.items)
+    },
     refreshRow(cell) {
+      if (cell.value.includes('  ') || cell.value.includes('\t')) {
+        this.splitValues(cell.index, cell.value)
+        return
+      }
+
       const item = cell.item
       let avtf = 0.0,
         avpf = 0.0
@@ -454,16 +488,24 @@ export default {
 }
 </script>
 <style>
-span,
 .col-form-label,
-input {
+.form-control-sm,
+.textarea.form-control {
   font-size: 0.75rem !important;
 }
-
+.custom-radio {
+  line-height: 1.8 !important;
+  font-size: 0.75rem !important;
+}
+textarea.form-control {
+  height: calc(1.5em + 0.5rem + 2px);
+  overflow-y: hidden;
+  text-align: center;
+}
 .container-left {
   position: fixed;
   left: 0;
-  top: 2.535rem;
+  top: 2.6rem;
   width: 20vw;
 }
 .container-right {
@@ -479,15 +521,28 @@ button {
 }
 .card-body {
   padding: 0.25vh 0.4vw 0.25vh 0vw;
+  border: none;
 }
 input {
   text-align: center;
 }
-.no-border {
+.no-border,
+.no-border:disabled {
   border: none;
   background-color: transparent;
 }
 .no-border:hover {
   background-color: white;
+}
+.btn {
+  padding: 0.2rem 0.3rem;
+  font-size: 0.8rem;
+}
+.docente {
+  text-align: left;
+  font-size: 0.85rem;
+}
+.table {
+  margin-bottom: 0.2rem;
 }
 </style>

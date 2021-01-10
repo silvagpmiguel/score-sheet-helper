@@ -4,41 +4,48 @@
       Importar CSV do Gerador de Pautas
     </h4>
     <b-card
+      class="converter-card"
       header-bg-variant="secondary"
-      header-
       header-text-variant="light"
       body-bg-variant="dark"
       body-text-variant="light"
       header="CSV to PDF Converter"
     >
-      <b-container class="w-75">
-        <b-form-group label-size="sm" label-cols-sm="1" label="CSV">
-          <b-form-file
-            size="sm"
-            v-model="file"
-            :state="validFile"
-            @input="readContents()"
-            placeholder="Choose/Drop a CSV file.."
-            drop-placeholder="Drop file here.."
-          ></b-form-file>
-        </b-form-group>
-        <b-form-group label-size="sm" label-cols-sm="1" label="Docente">
-          <b-form-input
-            size="sm"
-            class="text-center"
-            v-model="teacher"
-          ></b-form-input>
-        </b-form-group>
+      <b-container>
+        <div class="pt-1 pb-1">
+          <b-form-group label-size="sm" label-cols-sm="1" label="CSV">
+            <b-form-file
+              size="sm"
+              v-model="file"
+              :state="validFile"
+              @input="readContents()"
+              placeholder="Choose/Drop a CSV file.."
+              drop-placeholder="Drop file here.."
+            ></b-form-file>
+          </b-form-group>
+        </div>
+        <div class="pb-1">
+          <b-form-group label-size="sm" label-cols-sm="2" label="Docente">
+            <b-form-input
+              size="sm"
+              class="text-center"
+              v-model="teacher"
+            ></b-form-input>
+          </b-form-group>
+        </div>
       </b-container>
       <b-button
-        size="sm"
-        variant="light"
+        variant="primary"
+        class="mb-2"
         @click="generatePDF()"
         :disabled="file == null || teacher.length == 0"
+        v-b-tooltip.hover
+        title=""
         >Converter em PDF
       </b-button>
     </b-card>
     <PDFVue
+      variant="lg"
       ref="pdf"
       :filename="filename2"
       :title="title"
@@ -119,4 +126,10 @@ export default {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.converter-card {
+  width: 35rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+</style>
