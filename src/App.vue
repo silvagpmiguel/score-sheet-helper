@@ -18,8 +18,8 @@ export default {
 <style>
 html,
 body {
-  overflow-x: hidden;
   background-color: whitesmoke;
+  overflow-x: hidden;
 }
 
 #app {

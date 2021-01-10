@@ -1,36 +1,39 @@
 <template>
   <b-container class="pt-4">
-    <h4 class="text-center pb-3 font-weight-bold">Importar Pautas Excel</h4>
-    <b-row class="pb-5">
+    <h4 class="text-center pb-2 font-weight-bold">Importar Pautas Excel</h4>
+    <b-row class="pb-3">
       <b-form-file
         v-model="file"
         :state="checkFile()"
-        placeholder="Choose a file or drop it here..."
+        placeholder="Choose/Drop csv/xlxs file..."
         drop-placeholder="Drop file here..."
         class="w-50 mr-auto ml-auto"
       ></b-form-file>
     </b-row>
-    <b-container v-show="!meanBoolean" class="pb-3">
+    <b-container fluid v-show="!meanBoolean">
       <b-card
         header="Parâmetros"
         header-bg-variant="secondary"
         header-text-variant="light"
         body-bg-variant="dark"
         body-text-variant="light"
+        class="mr-auto ml-auto"
       >
         <b-form-group
           label-cols-lg="2"
-          label-size="lg"
-          label-class="font-weight-bold pt-0"
-          class="pr-5"
+          label-size="sm"
+          label-class="font-weight-bold"
+          class="adjust-middle"
         >
           <b-form-radio-group
-            class="pt-2 pb-3"
+            size="sm"
+            class="pb-2"
             v-model="selectedMethod"
             @input="adjustPercentages()"
             :options="methods"
           ></b-form-radio-group>
           <b-form-group
+            label-size="sm"
             label-cols-sm="4"
             label="U.C / Ano Letivo"
             label-align-sm="right"
@@ -39,18 +42,20 @@
             <b-row>
               <b-col>
                 <b-form-input
+                  size="sm"
                   placeholder="Unidade Curricular"
                   v-model="uc"
                   id="uc"
                 ></b-form-input>
               </b-col>
               <b-col>
-                <b-form-input v-model="date" id="date"></b-form-input>
+                <b-form-input size="sm" v-model="date" id="date"></b-form-input>
               </b-col>
             </b-row>
           </b-form-group>
           <b-form-group
             label-cols-sm="4"
+            label-size="sm"
             label="Nomes das Colunas dos Trabalhos"
             label-align-sm="right"
             label-for="nested-street"
@@ -63,6 +68,7 @@
               :disabled="true"
               v-model="jobNames"
               id="nested-street"
+              size="sm"
             ></b-form-input>
             <b-form-checkbox-group
               class="pt-2"
@@ -76,6 +82,7 @@
             label-cols-sm="4"
             label="Percentagem dos Trabalhos (0-1)"
             label-align-sm="right"
+            label-size="sm"
             label-for="nested-city"
             v-if="
               selectedMethod == 'Avaliação Prática' ||
@@ -83,6 +90,7 @@
             "
           >
             <b-form-input
+              size="sm"
               v-model="jobPercentages"
               id="nested-city"
             ></b-form-input>
@@ -91,18 +99,24 @@
             label-cols-sm="4"
             label="Nota Mínima Prática"
             label-align-sm="right"
+            label-size="sm"
             label-for="pMinGrade"
             v-if="
               selectedMethod == 'Avaliação Prática' ||
               selectedMethod == 'Avaliação Final'
             "
           >
-            <b-form-input v-model="pMinGrade" id="pMinGrade"></b-form-input>
+            <b-form-input
+              size="sm"
+              v-model="pMinGrade"
+              id="pMinGrade"
+            ></b-form-input>
           </b-form-group>
           <b-form-group
             label-cols-sm="4"
             label="Nomes das Colunas dos Testes"
             label-align-sm="right"
+            label-size="sm"
             label-for="nested-state"
             v-if="
               selectedMethod == 'Avaliação Teórica' ||
@@ -110,6 +124,7 @@
             "
           >
             <b-form-input
+              size="sm"
               :disabled="true"
               v-model="testNames"
               id="nested-state"
@@ -126,6 +141,7 @@
             label-cols-sm="4"
             label="Percentagem dos Testes (0-1)"
             label-align-sm="right"
+            label-size="sm"
             label-for="nested-country"
             v-if="
               selectedMethod == 'Avaliação Teórica' ||
@@ -133,6 +149,7 @@
             "
           >
             <b-form-input
+              size="sm"
               v-model="testPercentages"
               id="nested-country"
             ></b-form-input>
@@ -141,6 +158,7 @@
             label-cols-sm="4"
             label="Nota Mínima Teórica"
             label-align-sm="right"
+            label-size="sm"
             label-for="tMinGrade"
             v-if="
               selectedMethod == 'Avaliação Teórica' ||
@@ -148,6 +166,7 @@
             "
           >
             <b-form-input
+              size="sm"
               v-model="tMinGrade"
               id="nested-tMinGrade"
             ></b-form-input>
@@ -156,45 +175,48 @@
             label-cols-sm="4"
             label="Percentagem Final Teórica (0-1)"
             label-align-sm="right"
+            label-size="sm"
             label-for="nested-p"
             v-if="selectedMethod == 'Avaliação Final'"
           >
             <b-form-input
+              size="sm"
               v-model="t_evaluation_percentage"
               id="nested-p"
             ></b-form-input>
           </b-form-group>
 
           <b-form-group
+            class="mb-0"
             label-cols-sm="4"
             label="Percentagem Final Prática (0-1)"
             label-align-sm="right"
+            label-size="sm"
             label-for="nested-t"
             v-if="selectedMethod == 'Avaliação Final'"
           >
             <b-form-input
+              size="sm"
               v-model="p_evaluation_percentage"
               id="nested-t"
             ></b-form-input>
           </b-form-group>
         </b-form-group>
+        <b-button
+          size="sm"
+          v-show="!meanBoolean"
+          :disabled="
+            (testNames == '' || testPercentages == '') &&
+            (jobNames == '' || jobPercentages == '')
+          "
+          @click="calculateMean()"
+          variant="light"
+          >Calcular Media</b-button
+        >
       </b-card>
     </b-container>
-    <b-row class="pb-3">
-      <b-button
-        class="mr-auto ml-auto"
-        v-show="!meanBoolean"
-        :disabled="
-          (testNames == '' || testPercentages == '') &&
-          (jobNames == '' || jobPercentages == '')
-        "
-        @click="calculateMean()"
-        variant="dark"
-        >Calcular Media</b-button
-      >
-    </b-row>
-    <b-row class="pb-3 mr-auto ml-auto" v-show="meanBoolean">
-      <b-container class="pb-3">
+    <b-row class="pb-2 mr-auto ml-auto" v-show="meanBoolean">
+      <b-container class="pb-2">
         <label class="font-weight-bold">Nome do Docente</label>
         <b-form-input class="text-center" v-model="teacher"></b-form-input>
       </b-container>
@@ -371,7 +393,6 @@ export default {
       let arr = this.contents.trim().split('\n')
       utils.orderById(arr)
       let header = arr[0].split(this.separator)
-
       if (this.csv) {
         this.csv.files.push(this.file.name)
         utils.updateJSON(arr, header, this.csv, this.separator)
@@ -415,6 +436,7 @@ export default {
               blankrows: false,
             })
             .replace(/"/g, '')
+          this.separator = this.checkSeparator(this.contents)
           this.transformJSON()
           this.file = null
         }
@@ -495,5 +517,15 @@ export default {
 <style>
 h4 {
   text-align: center;
+}
+.adjust-middle {
+  padding-right: 10rem;
+}
+.form-group {
+  margin-bottom: 0.75rem;
+}
+
+.card-body {
+  padding: 0.75rem;
 }
 </style>

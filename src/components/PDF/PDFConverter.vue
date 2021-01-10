@@ -3,34 +3,41 @@
     <h4 class="text-center pb-3 font-weight-bold">
       Importar CSV do Gerador de Pautas
     </h4>
-    <b-container class="w-75">
-      <label class="font-weight-bold">Nome do Docente</label>
-      <b-form-input class="text-center mb-4" v-model="teacher"></b-form-input>
-    </b-container>
-    <b-row class="pb-4">
-      <b-form-file
-        v-model="file"
-        :state="validFile"
-        @input="readContents()"
-        placeholder="Choose a file or drop it here..."
-        drop-placeholder="Drop file here..."
-        class="w-50 mr-auto ml-auto"
-      ></b-form-file>
-    </b-row>
-    <div v-show="validFile" class="pb-3">
-      <label class="font-weight-bold" for="filename">Nome da nova Pauta</label>
-      <b-form-input
-        class="ml-auto mr-auto w-50 text-center"
-        id="filename"
-        v-model="filename2"
-      ></b-form-input>
-    </div>
-    <b-button
-      @click="generatePDF()"
-      :disabled="file == null || teacher.length == 0"
-      variant="dark"
-      >Converter em PDF
-    </b-button>
+    <b-card
+      header-bg-variant="secondary"
+      header-
+      header-text-variant="light"
+      body-bg-variant="dark"
+      body-text-variant="light"
+      header="CSV to PDF Converter"
+    >
+      <b-container class="w-75">
+        <b-form-group label-size="sm" label-cols-sm="1" label="CSV">
+          <b-form-file
+            size="sm"
+            v-model="file"
+            :state="validFile"
+            @input="readContents()"
+            placeholder="Choose/Drop a CSV file.."
+            drop-placeholder="Drop file here.."
+          ></b-form-file>
+        </b-form-group>
+        <b-form-group label-size="sm" label-cols-sm="1" label="Docente">
+          <b-form-input
+            size="sm"
+            class="text-center"
+            v-model="teacher"
+          ></b-form-input>
+        </b-form-group>
+      </b-container>
+      <b-button
+        size="sm"
+        variant="light"
+        @click="generatePDF()"
+        :disabled="file == null || teacher.length == 0"
+        >Converter em PDF
+      </b-button>
+    </b-card>
     <PDFVue
       ref="pdf"
       :filename="filename2"

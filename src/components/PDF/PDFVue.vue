@@ -17,9 +17,10 @@
         <h3 class="mt-3 pb-2 text-center font-weight-bold">{{ title }}</h3>
         <b-table
           striped
-          head-row-variant="none"
+          head-variant="dark"
           :items="items"
           :fields="fields"
+          borderless
         >
           <template v-slot:cell()="data">
             <div v-if="data.field.label == 'Nome'">{{ data.value }}</div>
