@@ -1,5 +1,13 @@
 <template>
-  <div class="main-container">
+  <div>
+    <PDFVue
+      ref="pdf"
+      :filename="filename"
+      :title="title"
+      :items="items"
+      :fields="fields"
+      :teacher="teacher"
+    />
     <div class="container-left">
       <b-card
         header-bg-variant="secondary"
@@ -171,14 +179,6 @@
         <span class="font-weight-bold">Docente: </span>{{ teacher }}
       </div>
     </div>
-    <PDFVue
-      ref="pdf"
-      :filename="filename"
-      :title="title"
-      :items="items"
-      :fields="fields"
-      :teacher="teacher"
-    />
   </div>
 </template>
 <script>

@@ -45,7 +45,6 @@
       </b-button>
     </b-card>
     <PDFVue
-      variant="lg"
       ref="pdf"
       :filename="filename2"
       :title="title"
