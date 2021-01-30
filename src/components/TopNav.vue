@@ -2,9 +2,9 @@
   <b-navbar small type="dark" variant="dark">
     <b-navbar-brand>Score Helper</b-navbar-brand>
     <b-navbar-nav small class="ml-auto">
-      <b-nav-item to="/createScore">Create Score</b-nav-item>
-      <b-nav-item to="/generateCSV">Import & Generate Score</b-nav-item>
-      <b-nav-item to="/convertToPDF">Convert CSV to PDF</b-nav-item>
+      <b-nav-item to="/create">Create Score</b-nav-item>
+      <b-nav-item to="/generate">Multiple Excel to Score</b-nav-item>
+      <b-nav-item to="/convert">Convert CSV to PDF</b-nav-item>
     </b-navbar-nav>
   </b-navbar>
 </template>

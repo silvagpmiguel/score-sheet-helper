@@ -1,8 +1,5 @@
 <template>
   <b-container class="pt-4">
-    <h4 class="text-center pb-3 font-weight-bold">
-      Importar CSV do Gerador de Pautas
-    </h4>
     <b-card
       class="converter-card"
       header-bg-variant="secondary"

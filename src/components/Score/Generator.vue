@@ -1,13 +1,15 @@
 <template>
   <b-container class="pt-4">
-    <h4 class="text-center pb-2 font-weight-bold">Importar Pautas Excel</h4>
+    <h4 class="text-center pb-2 font-weight-bold">
+      Converter Múltiplos Excel em Pauta Única
+    </h4>
     <b-row class="pb-3">
       <b-form-file
         size="sm"
         v-model="file"
         :state="checkFile()"
-        placeholder="Choose/Drop csv/xlxs file..."
-        drop-placeholder="Drop file here..."
+        placeholder="Import multiple csv/xlxs here..."
+        drop-placeholder="Drop excel here..."
         class="w-50 mr-auto ml-auto"
       ></b-form-file>
     </b-row>
@@ -31,7 +33,7 @@
           <b-form-group
             label-size="sm"
             label-cols-sm="4"
-            label="U.C / Ano Letivo"
+            label="Nome da U.C / Ano Letivo"
             label-align-sm="right"
             label-for="uc"
           >
@@ -71,7 +73,7 @@
               v-if="contents"
               v-model="selectedJobNames"
               @input="refreshInput('j', selectedJobNames)"
-              :options="csv.headers.slice().splice(2, csv.headers.length)"
+              :options="csv.headers.slice(2, csv.headers.length)"
             ></b-form-checkbox-group>
           </b-form-group>
           <b-form-group
@@ -130,7 +132,7 @@
               v-if="contents"
               v-model="selectedTestNames"
               @input="refreshInput('t', selectedTestNames)"
-              :options="csv.headers.slice().splice(2, csv.headers.length)"
+              :options="csv.headers.slice(2, csv.headers.length)"
             ></b-form-checkbox-group>
           </b-form-group>
           <b-form-group
@@ -208,7 +210,7 @@
           @click="calculateMean()"
           class="mt-2 mb-2"
           variant="primary"
-          >Calcular Media</b-button
+          >Calcular Média</b-button
         >
       </b-card>
     </b-container>
@@ -274,7 +276,7 @@ import utils from './utils.js'
 import Mixin from '../../mixins/mixin.js'
 
 export default {
-  name: 'Generator',
+  name: 'Converter',
   mixins: [Mixin],
   components: {
     PDFVue,
@@ -392,6 +394,7 @@ export default {
         return
 
       let arr = this.contents.trim().split('\n')
+      arr = utils.findHeader(arr, this.separator)
       utils.orderById(arr)
       let header = arr[0].split(this.separator)
       if (this.csv) {
@@ -413,7 +416,7 @@ export default {
         isValid = true
         const reader = new FileReader()
         reader.onload = (evt) => {
-          this.contents = evt.target.result
+          this.contents = evt.target.result.replace(/[;,]\n/g, '\n')
           this.separator = this.checkSeparator(this.contents)
           this.transformJSON()
           this.file = null
@@ -421,7 +424,7 @@ export default {
         reader.onerror = (evt) => {
           console.error(evt)
         }
-        reader.readAsText(new Blob([this.file]), 'UTF-8')
+        reader.readAsText(new Blob([this.file]), 'ISO-8859-1')
       } else if (file && this.file.name.endsWith('.xlsx')) {
         isValid = true
         const reader = new FileReader()
@@ -432,6 +435,8 @@ export default {
           const sheetsList = workbook.SheetNames
           this.contents = XLSX.utils
             .sheet_to_csv(workbook.Sheets[sheetsList[0]], {
+              strip: true,
+              forceQuotes: false,
               header: 1,
               defval: '',
               blankrows: false,

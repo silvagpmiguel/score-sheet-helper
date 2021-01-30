@@ -77,7 +77,6 @@ export default {
       for (let j = 0; j < jobs.length; j++) {
         if (csv[jobs[j]][i].includes(','))
           csv[jobs[j]][i] = csv[jobs[j]][i].replace(',', '.')
-
         if (!isNaN(csv[jobs[j]][i])) {
           mean_p += parseFloat(csv[jobs[j]][i]) * parseFloat(jobs_percentage[j])
         }
@@ -185,7 +184,6 @@ export default {
       let newHeader = csv.headers[j]
       newStruct[0].push(newHeader)
       let c = 0
-      newStruct[0]
       for (let k = 1; k < len; k++) {
         let val = csv[newHeader][c]
         if (val != undefined) {
@@ -197,5 +195,15 @@ export default {
       }
     }
     return newStruct
+  },
+  findHeader(arr, separator) {
+    const firstLine = arr[0].split(separator).length,
+      len = arr.length
+    let line = 1
+    for (; line < len; line++) {
+      if (firstLine < arr[line].split(separator).length)
+        return arr.slice(line, len)
+    }
+    return arr
   },
 }

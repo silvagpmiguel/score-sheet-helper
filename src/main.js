@@ -16,10 +16,10 @@ Vue.use(VueRouter)
 
 const router = new VueRouter({
   routes: [
-    { path: '/createScore', component: Creator },
-    { path: '/generateCSV', component: Generator },
-    { path: '/convertToPDF', component: PDFConverter },
-    { path: '*', redirect: '/createScore' },
+    { path: '/create', component: Creator },
+    { path: '/generate', component: Generator },
+    { path: '/convert', component: PDFConverter },
+    { path: '*', redirect: '/create' },
   ],
 })
 
