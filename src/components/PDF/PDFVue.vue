@@ -13,8 +13,7 @@
   >
     <section slot="pdf-content">
       <section class="pdf-item">
-        <div class="mt-0 pt-0 pl-1 pr-2">
-          <h5 class="text-center font-weight-bold">{{ title }}</h5>
+        <div class="mt-0 pt-1 pl-1 pr-1">
           <b-table
             thead-class="bg-dark text-white"
             :items="items"
@@ -22,18 +21,27 @@
             borderless
             striped
           >
-            <template v-slot:cell()="data">
-              <div v-if="data.field.label == 'Nome'">{{ data.value }}</div>
-              <div v-else class="text-center">{{ data.value }}</div>
+            <template #thead-top>
+              <b-tr>
+                <b-th colspan="12" class="first-header bg-secondary">
+                  {{ title }}
+                </b-th>
+              </b-tr>
             </template>
-            <template v-slot:head()="data">
-              <div v-if="data.label == 'Nome'">{{ data.label }}</div>
-              <div v-else class="text-center">{{ data.label }}</div>
+            <template #head()="data">
+              <div class="header">{{ data.label }}</div>
+            </template>
+            <template #cell()="data">
+              <div class="cell-value">{{ data.value }}</div>
+            </template>
+            <template #custom-foot>
+              <b-tr>
+                <b-th colspan="12" class="bg-secondary text-center">
+                  <div class="footer"><b>Docente: </b>{{ teacher }}</div>
+                </b-th>
+              </b-tr>
             </template>
           </b-table>
-          <div class="docente2">
-            <span class="font-weight-bold">Docente: </span>{{ teacher }}
-          </div>
         </div>
       </section>
     </section>
@@ -59,9 +67,21 @@ export default {
 </script>
 
 <style>
-.docente2 {
-  text-align: left;
+.first-header {
+  text-align: center;
+  font-size: 1.2rem;
+}
+.cell-value {
   font-size: 1rem;
+  text-align: center;
+}
+.footer {
+  font-size: 0.9rem;
+  color: white;
+}
+.header {
+  font-size: 1.1rem;
+  text-align: center;
 }
 .table-block tr {
   page-break-after: always !important;

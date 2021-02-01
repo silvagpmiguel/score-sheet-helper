@@ -146,7 +146,6 @@
       </b-card>
     </div>
     <div class="container-right">
-      <h4 class="font-weight-bold">{{ title }}</h4>
       <b-table
         ref="table"
         head-variant="dark"
@@ -156,6 +155,13 @@
         hover
         borderless
       >
+        <template #thead-top>
+          <b-tr>
+            <b-th colspan="12" class="bg-secondary">
+              {{ title }}
+            </b-th>
+          </b-tr>
+        </template>
         <template #head()="data">
           <Header
             :beforeKey="data.column"
@@ -174,10 +180,14 @@
             :disabled="data.field.key.slice(-1) == 'F'"
           ></b-form-textarea>
         </template>
+        <template #custom-foot>
+          <b-tr>
+            <b-th colspan="12" class="bg-secondary">
+              <small><b>Docente: </b>{{ teacher }}</small>
+            </b-th>
+          </b-tr>
+        </template>
       </b-table>
-      <div class="docente">
-        <span class="font-weight-bold">Docente: </span>{{ teacher }}
-      </div>
     </div>
   </div>
 </template>
@@ -510,9 +520,9 @@ textarea.form-control {
   width: 20vw;
 }
 .container-right {
-  padding-top: 0.5vh;
-  margin-left: 20.5vw;
-  width: 78.5vw;
+  padding-top: 0.21vh;
+  padding-left: 20vw;
+  width: 99.95vw;
 }
 button {
   border: none;
@@ -538,10 +548,6 @@ input {
 .btn {
   padding: 0.2rem 0.3rem;
   font-size: 0.8rem;
-}
-.docente {
-  text-align: left;
-  font-size: 0.85rem;
 }
 .table {
   margin-bottom: 0.2rem;
