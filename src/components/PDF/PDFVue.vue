@@ -13,7 +13,7 @@
   >
     <section slot="pdf-content">
       <section class="pdf-item">
-        <div class="mt-0 pt-1 pl-1 pr-1">
+        <div class="pt-1 pb-0 pl-1 pr-1">
           <b-table
             thead-class="bg-dark text-white"
             :items="items"
@@ -69,18 +69,14 @@ export default {
 <style>
 .first-header {
   text-align: center;
-  font-size: 1.2rem;
 }
 .cell-value {
-  font-size: 1rem;
   text-align: center;
 }
 .footer {
-  font-size: 0.9rem;
   color: white;
 }
 .header {
-  font-size: 1.1rem;
   text-align: center;
 }
 .table-block tr {

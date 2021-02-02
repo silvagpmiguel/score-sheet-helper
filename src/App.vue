@@ -18,8 +18,10 @@ export default {
 <style>
 html,
 body {
-  background-color: whitesmoke;
+  background-color: whitesmoke !important;
   overflow-x: hidden;
+  width: 100vw;
+  height: 100vh;
 }
 
 #app {
@@ -28,6 +30,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  background-color: whitesmoke;
+  background-color: whitesmoke !important;
 }
 </style>
