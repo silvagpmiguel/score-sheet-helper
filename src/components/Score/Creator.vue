@@ -7,7 +7,6 @@
       :items="items"
       :fields="fields"
       :teacher="teacher"
-      :pdfFormat="pdfFormat"
     />
     <div class="container-left">
       <b-card
@@ -185,17 +184,15 @@
 <script>
 import PDFVue from '../PDF/PDFVue'
 import Header from './Header'
+import mixin from '../../mixins/mixin.js'
+import pdfMixin from '../../mixins/pdf-opts-mixin.js'
+
 export default {
   name: 'Creator',
+  mixins: [mixin, pdfMixin],
   components: {
     PDFVue,
     Header,
-  },
-  mounted() {
-    if (window.navigator.platform.includes('Win')) {
-      this.separator = ';'
-      this.windows = true
-    }
   },
   data() {
     return {
@@ -234,16 +231,10 @@ export default {
       tPercent: 0.5,
       pPercent: 0.5,
       filename: 'pauta',
-      title: 'U.C de A - Ano Letivo B/C',
-      windows: false,
-      separator: ',',
-      teacher: '',
       tMin: 9.5,
       pMin: 9.5,
       fMin: 9.5,
       decision: 'Recurso',
-      pdfFormat: 'a4',
-      threshold: 2,
     }
   },
   methods: {
@@ -302,10 +293,6 @@ export default {
     removeColumn(lastKey) {
       const index = this.fields.findIndex((item) => item.key == lastKey)
       this.fields.splice(index, 1)
-    },
-    round(num, decimal) {
-      const num2 = Math.pow(10, decimal)
-      return isNaN(num) ? num : Math.round(num * num2) / num2
     },
     computeMean(item, type) {
       let mean = 0,
@@ -421,18 +408,9 @@ export default {
     },
     updateColsT(after, before) {
       if (after == before) return
-      const numcols = after + this.colsP
       const lastKey = `avT${before}`
       const key = `avT${after}`
       const label = `Av. Teórica ${after}`
-      this.pdfFormat = 'a4'
-
-      if (this.selectedOption == 'f') {
-        this.pdfFormat = numcols > this.threshold ? 'a2' : 'a3'
-      } else {
-        this.pdfFormat = numcols > this.threshold ? 'a3' : 'a4'
-      }
-
       if (after > before) {
         if (before == 1) {
           this.addColumn('avTF', 'avT1', 'Av. Teórica 1', 0)
@@ -449,18 +427,9 @@ export default {
     },
     updateColsP(after, before) {
       if (after == before) return
-      const threshold = after + this.colsP
       const lastKey = `avP${before}`
       const key = `avP${after}`
       const label = `Av. Prática ${after}`
-      this.pdfFormat = 'a4'
-
-      if (this.selectedOption == 'f') {
-        this.pdfFormat = threshold > 2 ? 'a2' : 'a3'
-      } else {
-        this.pdfFormat = threshold > 2 ? 'a3' : 'a4'
-      }
-
       if (after > before) {
         if (before == 1) {
           this.addColumn('avPF', 'avP1', 'Av. Prática 1', 0)
@@ -489,27 +458,24 @@ export default {
       FileSaver.saveAs(new Blob([output], { type: encode }), this.filename + '.csv')
     },
     downloadPDF() {
-      this.$refs.pdf.generatePDF()
+      this.$refs.pdf.generatePDF(this.computePdfFormat())
     },
   },
   watch: {
     selectedOption: function (option) {
       if (option == 't') {
-        this.pdfFormat = 'a4'
         this.fields = [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Nome' },
           { key: 'avTF', label: 'Av. Teórica Final' },
         ]
       } else if (option == 'p') {
-        this.pdfFormat = 'a4'
         this.fields = [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Nome' },
           { key: 'avPF', label: 'Av. Prática Final' },
         ]
       } else {
-        this.pdfFormat = 'a3'
         this.fields = [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Nome' },

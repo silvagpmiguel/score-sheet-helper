@@ -31,16 +31,18 @@
           <b-form-group
             label-size="sm"
             label-cols-sm="4"
-            label="Nome da U.C / Ano Letivo"
+            label="Unidade Curricular e Ano Letivo"
             label-align-sm="right"
-            label-for="uc"
+            label-for="title"
           >
             <b-row>
               <b-col>
-                <b-form-input size="sm" placeholder="Unidade Curricular" v-model="uc" id="uc"></b-form-input>
-              </b-col>
-              <b-col>
-                <b-form-input size="sm" v-model="date" id="date"></b-form-input>
+                <b-form-input
+                  size="sm"
+                  placeholder="Unidade Curricular"
+                  v-model="title"
+                  id="title"
+                ></b-form-input>
               </b-col>
             </b-row>
           </b-form-group>
@@ -191,11 +193,12 @@
 <script>
 import PDFVue from '../PDF/PDFVue.vue'
 import utils from './utils.js'
-import Mixin from '../../mixins/mixin.js'
+import mixin from '../../mixins/mixin.js'
+import pdfMixin from '../../mixins/pdf-opts-mixin.js'
 
 export default {
   name: 'Converter',
-  mixins: [Mixin],
+  mixins: [mixin, pdfMixin],
   components: {
     PDFVue,
   },
@@ -203,7 +206,6 @@ export default {
     return {
       /** Score */
       csv: null,
-      filename: 'avFinal.csv',
       selectedJobNames: [],
       selectedTestNames: [],
       jobNames: '',
@@ -214,8 +216,6 @@ export default {
       p_evaluation_percentage: 0.5,
       output: [[]],
       meanBoolean: false,
-      uc: '',
-      date: `${new Date().getFullYear() - 1}/${new Date().getFullYear()}`,
       selectedMethod: 'Avaliação Final',
       methods: ['Avaliação Teórica', 'Avaliação Prática', 'Avaliação Final'],
       tMinGrade: 9.5,
@@ -223,8 +223,6 @@ export default {
       out: [],
       csvGenerated: false,
       pdfGenerated: false,
-      teacher: '',
-
       /** WINDOWS & PDF OPTIONS ARE DECLARED IN THE MIXIN */
     }
   },
@@ -249,8 +247,7 @@ export default {
           this.testNames,
           this.testPercentages,
           this.output,
-          this.uc,
-          this.date,
+          this.title,
           this.csv,
           this.pMinGrade,
           this.tMinGrade,
@@ -259,24 +256,10 @@ export default {
         )
         msg = 'final'
       } else if (this.selectedMethod == 'Avaliação Prática') {
-        utils.calculatePraticalMean(
-          this.jobNames,
-          this.jobPercentages,
-          this.uc,
-          this.date,
-          this.output,
-          this.csv
-        )
+        utils.calculatePraticalMean(this.jobNames, this.jobPercentages, this.title, this.output, this.csv)
         msg = 'prática'
       } else {
-        utils.calculateTheoricalMean(
-          this.testNames,
-          this.testPercentages,
-          this.uc,
-          this.date,
-          this.csv,
-          this.output
-        )
+        utils.calculateTheoricalMean(this.testNames, this.testPercentages, this.title, this.csv, this.output)
         msg = 'teórica'
       }
       this.meanBoolean = true
@@ -310,8 +293,8 @@ export default {
     transformJSON() {
       if (this.csv && this.csv.files && this.csv.files.includes(this.file.name)) return
 
-      let arr = this.contents.trim().split('\n')
-      arr = utils.findHeader(arr, this.separator)
+      let arr = this.contents.split('\n')
+      arr = this.findHeader(arr, this.separator)
       utils.orderById(arr)
       let header = arr[0].split(this.separator)
       if (this.csv) {
@@ -333,7 +316,7 @@ export default {
         isValid = true
         const reader = new FileReader()
         reader.onload = (evt) => {
-          this.contents = evt.target.result.replace(/[;,]\n/g, '\n')
+          this.contents = evt.target.result.trim().replace(/[,;]+$/gm, '')
           this.separator = this.checkSeparator(this.contents)
           this.transformJSON()
           this.file = null
@@ -347,7 +330,7 @@ export default {
         const reader = new FileReader()
         const XLSX = require('xlsx')
         reader.onload = (evt) => {
-          const data = new Uint8Array(evt.target.result)
+          const data = new Uint8Array(evt.target.result.trim().replace(/[,;]+$/gm, ''))
           const workbook = XLSX.read(data, { type: 'array' })
           const sheetsList = workbook.SheetNames
           this.contents = XLSX.utils
@@ -400,7 +383,7 @@ export default {
     downloadPDF() {
       this.transformCSVToPDF(this.out)
       this.pdfGenerated = true
-      this.$refs.pdf.generatePDF()
+      this.$refs.pdf.generatePDF(this.computePdfFormat())
     },
     clear() {
       this.fields = []
@@ -431,7 +414,7 @@ export default {
       this.testPercentages = ''
       this.selectedJobNames = []
       this.selectedTestNames = []
-      this.uc = ''
+      this.title = ''
       this.filename = 'avFinal.csv'
     },
   },

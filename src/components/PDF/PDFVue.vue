@@ -6,9 +6,9 @@
     :filename="filename"
     :paginate-elements-by-height="8000"
     pdf-content-width="100%"
-    :pdf-format="pdfFormat"
     pdf-orientation="portrait"
     @hasGenerated="$parent.clear()"
+    @beforeDownload="beforeDownload"
     ref="html2Pdf"
   >
     <section slot="pdf-content">
@@ -51,10 +51,22 @@ export default {
     filename: String,
     title: String,
     teacher: String,
-    pdfFormat: String,
+  },
+  data() {
+    return {
+      jsPDF: {
+        unit: 'in',
+        format: 'a4',
+        orientation: 'portrait',
+      },
+    }
   },
   methods: {
-    generatePDF() {
+    beforeDownload(ev) {
+      ev.options.jsPDF = this.jsPDF
+    },
+    generatePDF(jsPDF) {
+      this.jsPDF = jsPDF
       this.$refs.html2Pdf.generatePdf()
     },
   },

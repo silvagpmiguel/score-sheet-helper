@@ -1,15 +1,15 @@
 export default {
   mounted() {
-    if (window.navigator.platform.includes('Win')) this.windows = true
+    if (!window.navigator.platform.includes('Win')) {
+      this.windows = false
+      this.separator = ','
+    }
   },
   data() {
     return {
-      windows: false,
+      windows: true,
       file: null,
       contents: null,
-      items: [],
-      fields: [],
-      title: '',
       filename2: '',
       separator: ';',
     }
@@ -26,8 +26,21 @@ export default {
         this.items.push(json)
       }
     },
+    findHeader(arr, separator) {
+      const firstLine = arr[0].split(separator).length,
+        len = arr.length
+      let line = 1
+      for (; line < len; line++) {
+        if (firstLine < arr[line].split(separator).length) return arr.slice(line, len)
+      }
+      return arr
+    },
     checkSeparator(contents) {
       return contents.split(',').length > contents.split(';').length ? ',' : ';'
+    },
+    round(num, decimal) {
+      const num2 = Math.pow(10, decimal)
+      return isNaN(num) ? num : Math.round(num * num2) / num2
     },
     makeToast(text, flag) {
       let variant = flag ? 'success' : 'danger'

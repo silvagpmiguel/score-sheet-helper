@@ -50,11 +50,12 @@
 
 <script>
 import PDFVue from './PDFVue.vue'
-import Mixin from '../../mixins/mixin.js'
+import mixin from '../../mixins/mixin.js'
+import pdfMixin from '../../mixins/pdf-opts-mixin.js'
 
 export default {
   name: 'PDFConverter',
-  mixins: [Mixin],
+  mixins: [mixin, pdfMixin],
   components: {
     PDFVue,
   },
@@ -62,7 +63,6 @@ export default {
     return {
       /** WINDOWS & PDF OPTIONS ARE DECLARED IN THE MIXIN */
       validFile: false,
-      teacher: '',
     }
   },
   methods: {
@@ -73,7 +73,6 @@ export default {
       this.title = ''
       this.filename2 = ''
       this.validFile = false
-      this.pdfGenerated = false
     },
     readContents() {
       if (this.checkFile()) {
@@ -81,8 +80,7 @@ export default {
         if (this.windows) reader.readAsText(new Blob([this.file]), 'windows-1252')
         else reader.readAsText(new Blob([this.file]), 'UTF-8')
         reader.onloadend = (evt) => {
-          this.contents = evt.target.result
-          this.separator = this.checkSeparator(this.contents)
+          this.contents = evt.target.result.trim().replace(/[,;]+$/gm, '')
         }
         reader.onerror = (evt) => {
           console.error(evt)
@@ -90,9 +88,9 @@ export default {
       }
     },
     generatePDF() {
+      this.separator = this.checkSeparator(this.contents)
       this.transformCSVToPDF(this.contents)
-      this.pdfGenerated = true
-      this.$refs.pdf.generatePDF()
+      this.$refs.pdf.generatePDF(this.computePdfFormat())
       this.file = null
     },
     checkFile() {

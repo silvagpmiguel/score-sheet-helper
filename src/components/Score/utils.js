@@ -1,8 +1,8 @@
 export default {
-  calculateTheoricalMean(testNames, testPercentages, uc, date, csv, output) {
+  calculateTheoricalMean(testNames, testPercentages, uc, csv, output) {
     let tests = testNames.split(',')
     let tests_percentage = testPercentages.split(',')
-    output.push([`U.C de ${uc} - Ano Letivo ${date}`])
+    output.push(uc)
     let outputHeaders = [csv.headers[0], csv.headers[1], 'Av. Teórica']
     output.push(outputHeaders)
     let grade
@@ -18,10 +18,10 @@ export default {
       output.push([csv[csv.headers[0]][i], csv[csv.headers[1]][i], grade])
     }
   },
-  calculatePraticalMean(jobNames, jobPercentages, uc, date, output, csv) {
+  calculatePraticalMean(jobNames, jobPercentages, uc, output, csv) {
     let jobs = jobNames.split(',')
     let jobs_percentage = jobPercentages.split(',')
-    output.push([`U.C de ${uc} - Ano Letivo ${date}`])
+    output.push(uc)
     let outputHeaders = [csv.headers[0], csv.headers[1], 'Av. Prática']
     output.push(outputHeaders)
     let grade
@@ -46,7 +46,6 @@ export default {
     testPercentages,
     output,
     uc,
-    date,
     csv,
     pMinGrade,
     tMinGrade,
@@ -59,7 +58,7 @@ export default {
     let tests_percentage = testPercentages.split(',')
     let pGrade, tGrade, grade
 
-    output.push([`U.C de ${uc} - Ano Letivo ${date}`])
+    output.push([uc])
     let outputHeaders = [csv.headers[0], csv.headers[1], 'Av. Prática', 'Av. Teórica', 'Av. Final']
     output.push(outputHeaders)
 
@@ -175,14 +174,5 @@ export default {
       }
     }
     return newStruct
-  },
-  findHeader(arr, separator) {
-    const firstLine = arr[0].split(separator).length,
-      len = arr.length
-    let line = 1
-    for (; line < len; line++) {
-      if (firstLine < arr[line].split(separator).length) return arr.slice(line, len)
-    }
-    return arr
   },
 }
