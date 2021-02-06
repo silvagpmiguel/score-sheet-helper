@@ -330,17 +330,18 @@ export default {
         const reader = new FileReader()
         const XLSX = require('xlsx')
         reader.onload = (evt) => {
-          const data = new Uint8Array(evt.target.result.trim().replace(/[,;]+$/gm, ''))
+          const data = new Uint8Array(evt.target.result)
           const workbook = XLSX.read(data, { type: 'array' })
           const sheetsList = workbook.SheetNames
           this.contents = XLSX.utils
             .sheet_to_csv(workbook.Sheets[sheetsList[0]], {
+              FS: ';',
               strip: true,
               forceQuotes: false,
               header: 1,
-              defval: '',
               blankrows: false,
             })
+            .trim()
             .replace(/"/g, '')
           this.separator = this.checkSeparator(this.contents)
           this.transformJSON()
@@ -375,7 +376,7 @@ export default {
         encode = 'text/csv;charset=win1252'
       }
 
-      let blob = new Blob([encodedOutput], { type: encode })
+      const blob = new Blob([encodedOutput], { type: encode })
       FileSaver.saveAs(blob, this.filename)
       this.csvGenerated = true
       this.clearCSVDependencies()
