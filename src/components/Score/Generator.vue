@@ -1,8 +1,6 @@
 <template>
   <b-container class="pt-4">
-    <h4 class="text-center pb-2 font-weight-bold">
-      Converter Múltiplos Excel em Pauta Única
-    </h4>
+    <h4 class="text-center pb-2 font-weight-bold">Converter Múltiplos Excel em Pauta Única</h4>
     <b-row class="pb-3">
       <b-form-file
         size="sm"
@@ -39,12 +37,7 @@
           >
             <b-row>
               <b-col>
-                <b-form-input
-                  size="sm"
-                  placeholder="Unidade Curricular"
-                  v-model="uc"
-                  id="uc"
-                ></b-form-input>
+                <b-form-input size="sm" placeholder="Unidade Curricular" v-model="uc" id="uc"></b-form-input>
               </b-col>
               <b-col>
                 <b-form-input size="sm" v-model="date" id="date"></b-form-input>
@@ -57,17 +50,9 @@
             label="Nomes das Colunas dos Trabalhos"
             label-align-sm="right"
             label-for="nested-street"
-            v-if="
-              selectedMethod == 'Avaliação Prática' ||
-              selectedMethod == 'Avaliação Final'
-            "
+            v-if="selectedMethod == 'Avaliação Prática' || selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              :disabled="true"
-              v-model="jobNames"
-              id="nested-street"
-              size="sm"
-            ></b-form-input>
+            <b-form-input :disabled="true" v-model="jobNames" id="nested-street" size="sm"></b-form-input>
             <b-form-checkbox-group
               class="pt-2"
               v-if="contents"
@@ -82,16 +67,9 @@
             label-align-sm="right"
             label-size="sm"
             label-for="nested-city"
-            v-if="
-              selectedMethod == 'Avaliação Prática' ||
-              selectedMethod == 'Avaliação Final'
-            "
+            v-if="selectedMethod == 'Avaliação Prática' || selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              size="sm"
-              v-model="jobPercentages"
-              id="nested-city"
-            ></b-form-input>
+            <b-form-input size="sm" v-model="jobPercentages" id="nested-city"></b-form-input>
           </b-form-group>
           <b-form-group
             label-cols-sm="4"
@@ -99,16 +77,9 @@
             label-align-sm="right"
             label-size="sm"
             label-for="pMinGrade"
-            v-if="
-              selectedMethod == 'Avaliação Prática' ||
-              selectedMethod == 'Avaliação Final'
-            "
+            v-if="selectedMethod == 'Avaliação Prática' || selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              size="sm"
-              v-model="pMinGrade"
-              id="pMinGrade"
-            ></b-form-input>
+            <b-form-input size="sm" v-model="pMinGrade" id="pMinGrade"></b-form-input>
           </b-form-group>
           <b-form-group
             label-cols-sm="4"
@@ -116,17 +87,9 @@
             label-align-sm="right"
             label-size="sm"
             label-for="nested-state"
-            v-if="
-              selectedMethod == 'Avaliação Teórica' ||
-              selectedMethod == 'Avaliação Final'
-            "
+            v-if="selectedMethod == 'Avaliação Teórica' || selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              size="sm"
-              :disabled="true"
-              v-model="testNames"
-              id="nested-state"
-            ></b-form-input>
+            <b-form-input size="sm" :disabled="true" v-model="testNames" id="nested-state"></b-form-input>
             <b-form-checkbox-group
               class="pt-2"
               v-if="contents"
@@ -141,16 +104,9 @@
             label-align-sm="right"
             label-size="sm"
             label-for="nested-country"
-            v-if="
-              selectedMethod == 'Avaliação Teórica' ||
-              selectedMethod == 'Avaliação Final'
-            "
+            v-if="selectedMethod == 'Avaliação Teórica' || selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              size="sm"
-              v-model="testPercentages"
-              id="nested-country"
-            ></b-form-input>
+            <b-form-input size="sm" v-model="testPercentages" id="nested-country"></b-form-input>
           </b-form-group>
           <b-form-group
             label-cols-sm="4"
@@ -158,16 +114,9 @@
             label-align-sm="right"
             label-size="sm"
             label-for="tMinGrade"
-            v-if="
-              selectedMethod == 'Avaliação Teórica' ||
-              selectedMethod == 'Avaliação Final'
-            "
+            v-if="selectedMethod == 'Avaliação Teórica' || selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              size="sm"
-              v-model="tMinGrade"
-              id="nested-tMinGrade"
-            ></b-form-input>
+            <b-form-input size="sm" v-model="tMinGrade" id="nested-tMinGrade"></b-form-input>
           </b-form-group>
           <b-form-group
             label-cols-sm="4"
@@ -177,11 +126,7 @@
             label-for="nested-p"
             v-if="selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              size="sm"
-              v-model="t_evaluation_percentage"
-              id="nested-p"
-            ></b-form-input>
+            <b-form-input size="sm" v-model="t_evaluation_percentage" id="nested-p"></b-form-input>
           </b-form-group>
 
           <b-form-group
@@ -193,20 +138,13 @@
             label-for="nested-t"
             v-if="selectedMethod == 'Avaliação Final'"
           >
-            <b-form-input
-              size="sm"
-              v-model="p_evaluation_percentage"
-              id="nested-t"
-            ></b-form-input>
+            <b-form-input size="sm" v-model="p_evaluation_percentage" id="nested-t"></b-form-input>
           </b-form-group>
         </div>
         <b-button
           size="sm"
           v-show="!meanBoolean"
-          :disabled="
-            (testNames == '' || testPercentages == '') &&
-            (jobNames == '' || jobPercentages == '')
-          "
+          :disabled="(testNames == '' || testPercentages == '') && (jobNames == '' || jobPercentages == '')"
           @click="calculateMean()"
           class="mt-2 mb-2"
           variant="primary"
@@ -223,38 +161,18 @@
       <b-col class="pr-5">
         <label class="font-weight-bold" for="filename">Nome da Pauta CSV</label>
         <div class="pb-2">
-          <b-form-input
-            size="sm"
-            class="text-center"
-            id="filename"
-            v-model="filename"
-          ></b-form-input>
+          <b-form-input size="sm" class="text-center" id="filename" v-model="filename"></b-form-input>
         </div>
-        <b-button
-          size="sm"
-          :disabled="teacher.length == 0"
-          @click="downloadCSV()"
-          variant="primary"
+        <b-button size="sm" :disabled="teacher.length == 0" @click="downloadCSV()" variant="primary"
           >Download CSV</b-button
         >
       </b-col>
       <b-col class="pl-5">
-        <label class="font-weight-bold" for="filename2"
-          >Nome da Pauta PDF</label
-        >
+        <label class="font-weight-bold" for="filename2">Nome da Pauta PDF</label>
         <div class="pb-2">
-          <b-form-input
-            size="sm"
-            class="text-center"
-            id="filename2"
-            v-model="filename2"
-          ></b-form-input>
+          <b-form-input size="sm" class="text-center" id="filename2" v-model="filename2"></b-form-input>
         </div>
-        <b-button
-          size="sm"
-          :disabled="teacher.length == 0"
-          @click="downloadPDF()"
-          variant="primary"
+        <b-button size="sm" :disabled="teacher.length == 0" @click="downloadPDF()" variant="primary"
           >Download PDF</b-button
         >
       </b-col>
@@ -390,8 +308,7 @@ export default {
       }
     },
     transformJSON() {
-      if (this.csv && this.csv.files && this.csv.files.includes(this.file.name))
-        return
+      if (this.csv && this.csv.files && this.csv.files.includes(this.file.name)) return
 
       let arr = this.contents.trim().split('\n')
       arr = utils.findHeader(arr, this.separator)

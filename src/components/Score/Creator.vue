@@ -7,6 +7,7 @@
       :items="items"
       :fields="fields"
       :teacher="teacher"
+      :pdfFormat="pdfFormat"
     />
     <div class="container-left">
       <b-card
@@ -16,12 +17,7 @@
         body-text-variant="light"
         header="Definições da Pauta"
       >
-        <b-form-radio-group
-          size="sm"
-          class="pb-1"
-          v-model="selectedOption"
-          :options="options"
-        >
+        <b-form-radio-group size="sm" class="pb-1" v-model="selectedOption" :options="options">
         </b-form-radio-group>
         <b-form-group label-cols-sm="3" label="Título">
           <b-form-input size="sm" v-model="title"></b-form-input>
@@ -40,6 +36,7 @@
               min="1"
               max="4"
               inline
+              @change="updateColsP($event, beforeP)"
             ></b-form-spinbutton>
           </b-form-group>
           <b-form-group label-cols-sm="3" label="P(%)">
@@ -65,6 +62,7 @@
               min="1"
               max="4"
               inline
+              @change="updateColsT($event, beforeT)"
             ></b-form-spinbutton>
           </b-form-group>
           <b-form-group label-cols-sm="3" label="T(%)">
@@ -146,15 +144,7 @@
       </b-card>
     </div>
     <div class="container-right">
-      <b-table
-        ref="table"
-        head-variant="dark"
-        :fields="fields"
-        :items="items"
-        striped
-        hover
-        borderless
-      >
+      <b-table ref="table" head-variant="dark" :fields="fields" :items="items" striped hover borderless>
         <template #thead-top>
           <b-tr>
             <b-th colspan="12" class="bg-secondary">
@@ -163,21 +153,22 @@
           </b-tr>
         </template>
         <template #head()="data">
-          <Header
-            :beforeKey="data.column"
-            :beforeLabel="data.label"
-            @updateHeader="updateHeader"
-          />
+          <Header :beforeKey="data.column" :beforeLabel="data.label" @updateHeader="updateHeader" />
         </template>
         <template #cell()="data">
           <b-form-textarea
+            rows="2"
             no-auto-shrink
             no-resize
             size="sm"
             v-model="data.item[data.field.key]"
             class="no-border"
             @blur="refreshRow(data)"
-            :disabled="data.field.key.slice(-1) == 'F'"
+            :disabled="
+              data.field.key == 'avF' ||
+              (data.field.key == 'avTF' && colsT > 1) ||
+              (data.field.key == 'avTP' && colsP > 1)
+            "
           ></b-form-textarea>
         </template>
         <template #custom-foot>
@@ -228,7 +219,6 @@ export default {
       fields: [
         { key: 'id', label: 'ID' },
         { key: 'name', label: 'Nome' },
-        { key: 'avT1', label: 'Av. Teórica 1' },
         { key: 'avTF', label: 'Av. Teórica Final' },
       ],
       options: [
@@ -238,7 +228,9 @@ export default {
       ],
       selectedOption: 't',
       colsT: 1,
+      beforeT: 1,
       colsP: 1,
+      beforeP: 1,
       tPercent: 0.5,
       pPercent: 0.5,
       filename: 'pauta',
@@ -250,10 +242,11 @@ export default {
       pMin: 9.5,
       fMin: 9.5,
       decision: 'Recurso',
+      pdfFormat: 'a4',
+      threshold: 2,
     }
   },
   methods: {
-    clear() {},
     popColumn() {
       this.fields.pop()
     },
@@ -299,9 +292,9 @@ export default {
     deleteLastRow() {
       this.items.pop()
     },
-    addColumn(lastKey, key, label) {
+    addColumn(lastKey, key, label, targetIndex) {
       const index = this.fields.findIndex((item) => item.key == lastKey)
-      this.fields.splice(index + 1, 0, {
+      this.fields.splice(index + targetIndex, 0, {
         key: key,
         label: label,
       })
@@ -316,12 +309,14 @@ export default {
     },
     computeMean(item, type) {
       let mean = 0,
-        len = 0
-      let str = ''
-      let nan = true
+        len = 0,
+        str = '',
+        nan = true,
+        val = null
 
       for (let key in item) {
-        let val = item[key]
+        item[key] = item[key].toString().trim().replaceAll(',', '.')
+        val = item[key]
         if (key[2] == type && key[3] != 'F') {
           if (isNaN(val)) {
             str = val
@@ -336,60 +331,61 @@ export default {
       return nan ? str : this.round(mean / len, 1)
     },
     splitValues(index, value) {
-      const arr = value.split('\n')
+      const arr = value.trim().replaceAll(',', '.').split('\n')
       const len = this.items.length
       let i = index
       for (let line of arr) {
-        let j = 0
-        let values = line.split(/\t|[ ]{2,}/)
+        let j = 0,
+          values = line.split(/\t|[ ]{2,}/)
         if (i >= len) {
           this.addRow()
         }
         for (let k = 0; k < values.length && k < this.fields.length; k++) {
           this.items[i][this.fields[j++]['key']] = values[k]
         }
+        this.calculateMean(this.items[i])
         i++
       }
     },
     refreshRow(cell) {
-      if (cell.value.includes('  ') || cell.value.includes('\t')) {
-        this.splitValues(cell.index, cell.value)
+      const cellValue = isNaN(cell.value) ? cell.value : ''
+      if (cellValue.includes('  ') || cellValue.includes('\t')) {
+        this.splitValues(cell.index, cellValue)
         return
       }
-
-      const item = cell.item
+      this.calculateMean(cell.item)
+    },
+    calculateMean(item) {
+      const isOneColT = this.colsT == 1,
+        isOneColP = this.colsP == 1
       let avtf = 0.0,
         avpf = 0.0
       switch (this.selectedOption) {
         case 'p': {
-          cell.item.avPF = this.round(this.computeMean(item, 'P'), 0)
+          item.avPF = item.avPF.toString().trim().replaceAll(',', '.')
+          item.avPF = isOneColP ? this.round(item.avPF, 1) : this.round(this.computeMean(item, 'P'), 1)
           break
         }
         case 't': {
-          cell.item.avTF = this.round(this.computeMean(item, 'T'), 0)
+          item.avTF = item.avTF.toString().trim().replaceAll(',', '.')
+          item.avTF = isOneColT ? this.round(item.avTF, 1) : this.round(this.computeMean(item, 'T'), 1)
           break
         }
         case 'f': {
-          avtf = this.computeMean(item, 'T')
-          avpf = this.computeMean(item, 'P')
-          cell.item.avTF = this.round(avtf, 0)
-          cell.item.avPF = this.round(avpf, 0)
+          avtf = isOneColT ? item.avTF.toString().trim().replaceAll(',', '.') : this.computeMean(item, 'T')
+          avpf = isOneColP ? item.avPF.toString().trim().replaceAll(',', '.') : this.computeMean(item, 'P')
+          item.avTF = this.round(avtf, 1)
+          item.avPF = this.round(avpf, 1)
           avtf = isNaN(avtf) ? 0.0 : avtf
           avpf = isNaN(avpf) ? 0.0 : avpf
 
           if (avtf < this.tMin || avpf < this.pMin) {
-            cell.item.avF = this.decision
+            item.avF = this.decision
             break
           }
 
-          cell.item.avF = this.round(
-            avtf * this.tPercent + avpf * this.pPercent,
-            0
-          )
-          cell.item.avF =
-            cell.item.avF < this.fMin
-              ? cell.item.avF + `(${this.decision})`
-              : cell.item.avF
+          item.avF = this.round(avtf * this.tPercent + avpf * this.pPercent, 0)
+          item.avF = item.avF < this.fMin ? item.avF + `(${this.decision})` : item.avF
           break
         }
       }
@@ -423,6 +419,62 @@ export default {
 
       return out
     },
+    updateColsT(after, before) {
+      if (after == before) return
+      const numcols = after + this.colsP
+      const lastKey = `avT${before}`
+      const key = `avT${after}`
+      const label = `Av. Teórica ${after}`
+      this.pdfFormat = 'a4'
+
+      if (this.selectedOption == 'f') {
+        this.pdfFormat = numcols > this.threshold ? 'a2' : 'a3'
+      } else {
+        this.pdfFormat = numcols > this.threshold ? 'a3' : 'a4'
+      }
+
+      if (after > before) {
+        if (before == 1) {
+          this.addColumn('avTF', 'avT1', 'Av. Teórica 1', 0)
+        }
+        this.addColumn(lastKey, key, label, 1)
+      } else {
+        if (after == 1) {
+          this.removeColumn('avT1')
+        }
+        this.removeColumn(lastKey)
+      }
+      this.beforeT = after
+      this.$refs.table.refresh()
+    },
+    updateColsP(after, before) {
+      if (after == before) return
+      const threshold = after + this.colsP
+      const lastKey = `avP${before}`
+      const key = `avP${after}`
+      const label = `Av. Prática ${after}`
+      this.pdfFormat = 'a4'
+
+      if (this.selectedOption == 'f') {
+        this.pdfFormat = threshold > 2 ? 'a2' : 'a3'
+      } else {
+        this.pdfFormat = threshold > 2 ? 'a3' : 'a4'
+      }
+
+      if (after > before) {
+        if (before == 1) {
+          this.addColumn('avPF', 'avP1', 'Av. Prática 1', 0)
+        }
+        this.addColumn(lastKey, key, label, 1)
+      } else {
+        if (after == 1) {
+          this.removeColumn('avP1')
+        }
+        this.removeColumn(lastKey)
+      }
+      this.beforeP = after
+      this.$refs.table.refresh()
+    },
     downloadCSV() {
       let iconv = require('iconv-lite')
       let FileSaver = require('file-saver')
@@ -434,10 +486,7 @@ export default {
         encode = 'text/csv;charset=win1252'
       }
 
-      FileSaver.saveAs(
-        new Blob([output], { type: encode }),
-        this.filename + '.csv'
-      )
+      FileSaver.saveAs(new Blob([output], { type: encode }), this.filename + '.csv')
     },
     downloadPDF() {
       this.$refs.pdf.generatePDF()
@@ -446,53 +495,36 @@ export default {
   watch: {
     selectedOption: function (option) {
       if (option == 't') {
+        this.pdfFormat = 'a4'
         this.fields = [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Nome' },
-          { key: 'avT1', label: 'Av. Teórica 1' },
           { key: 'avTF', label: 'Av. Teórica Final' },
         ]
       } else if (option == 'p') {
+        this.pdfFormat = 'a4'
         this.fields = [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Nome' },
-          { key: 'avP1', label: 'Av. Prática 1' },
           { key: 'avPF', label: 'Av. Prática Final' },
         ]
       } else {
+        this.pdfFormat = 'a3'
         this.fields = [
           { key: 'id', label: 'ID' },
           { key: 'name', label: 'Nome' },
-          { key: 'avP1', label: 'Av. Prática 1' },
           { key: 'avPF', label: 'Av. Prática Final' },
-          { key: 'avT1', label: 'Av. Teórica 1' },
           { key: 'avTF', label: 'Av. Teórica Final' },
           { key: 'avF', label: 'Av. Final' },
         ]
       }
       this.resetTable()
-    },
-    colsT: function (after, before) {
-      const lastKey = `avT${before}`
-      const key = `avT${after}`
-      const label = `Av. Teórica ${after}`
-
-      if (after > before) {
-        this.addColumn(lastKey, key, label)
-      } else {
-        this.removeColumn(lastKey)
-      }
-      this.$refs.table.refresh()
-    },
-    colsP: function (after, before) {
-      const lastKey = `avP${before}`
-      const key = `avP${after}`
-      const label = `Av. Prática ${after}`
-      if (after > before) {
-        this.addColumn(lastKey, key, label)
-      } else {
-        this.removeColumn(lastKey)
-      }
+      this.colsT = 1
+      this.beforeT = 1
+      this.colsP = 1
+      this.beforeP = 1
+      this.tPercent = 0.5
+      this.pPercent = 0.5
       this.$refs.table.refresh()
     },
   },
@@ -510,8 +542,8 @@ export default {
 }
 textarea.form-control {
   height: calc(1.5em + 0.5rem + 2px);
-  overflow-y: hidden;
   text-align: center;
+  overflow-y: hidden;
 }
 .container-left {
   position: fixed;

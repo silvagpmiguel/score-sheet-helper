@@ -10,8 +10,7 @@ export default {
       let mean_t = parseFloat('0')
       for (let k = 0; k < tests.length; k++) {
         if (!isNaN(csv[tests[k]][i])) {
-          mean_t +=
-            parseFloat(csv[tests[k]][i]) * parseFloat(tests_percentage[k])
+          mean_t += parseFloat(csv[tests[k]][i]) * parseFloat(tests_percentage[k])
         }
       }
 
@@ -30,8 +29,7 @@ export default {
     for (let i = 0; i < csv[jobs[0]].length; i++) {
       let mean_p = parseFloat('0')
       for (let j = 0; j < jobs.length; j++) {
-        if (csv[jobs[j]][i].includes(','))
-          csv[jobs[j]][i] = csv[jobs[j]][i].replace(',', '.')
+        if (csv[jobs[j]][i].includes(',')) csv[jobs[j]][i] = csv[jobs[j]][i].replace(',', '.')
 
         if (!isNaN(csv[jobs[j]][i])) {
           mean_p += parseFloat(csv[jobs[j]][i]) * parseFloat(jobs_percentage[j])
@@ -62,56 +60,38 @@ export default {
     let pGrade, tGrade, grade
 
     output.push([`U.C de ${uc} - Ano Letivo ${date}`])
-    let outputHeaders = [
-      csv.headers[0],
-      csv.headers[1],
-      'Av. Prática',
-      'Av. Teórica',
-      'Av. Final',
-    ]
+    let outputHeaders = [csv.headers[0], csv.headers[1], 'Av. Prática', 'Av. Teórica', 'Av. Final']
     output.push(outputHeaders)
 
     for (let i = 0; i < csv[jobs[0]].length; i++) {
       let mean_p = parseFloat('0')
       let mean_t = parseFloat('0')
       for (let j = 0; j < jobs.length; j++) {
-        if (csv[jobs[j]][i].includes(','))
-          csv[jobs[j]][i] = csv[jobs[j]][i].replace(',', '.')
+        if (csv[jobs[j]][i].includes(',')) csv[jobs[j]][i] = csv[jobs[j]][i].replace(',', '.')
         if (!isNaN(csv[jobs[j]][i])) {
           mean_p += parseFloat(csv[jobs[j]][i]) * parseFloat(jobs_percentage[j])
         }
       }
       for (let k = 0; k < tests.length; k++) {
         if (!isNaN(csv[tests[k]][i])) {
-          mean_t +=
-            parseFloat(csv[tests[k]][i]) * parseFloat(tests_percentage[k])
+          mean_t += parseFloat(csv[tests[k]][i]) * parseFloat(tests_percentage[k])
         }
       }
 
       if (pMinGrade == 0) {
         pGrade = mean_p.toFixed(2)
       } else {
-        pGrade =
-          mean_p < pMinGrade ? mean_p.toFixed(2) + ' (R)' : mean_p.toFixed(2)
+        pGrade = mean_p < pMinGrade ? mean_p.toFixed(2) + ' (R)' : mean_p.toFixed(2)
       }
 
-      tGrade =
-        mean_t < tMinGrade ? mean_t.toFixed(2) + ' (R)' : mean_t.toFixed(2)
+      tGrade = mean_t < tMinGrade ? mean_t.toFixed(2) + ' (R)' : mean_t.toFixed(2)
       if (isNaN(pGrade) || isNaN(tGrade)) grade = 'R'
       else {
-        let aux =
-          mean_t * parseFloat(t_evaluation_percentage) +
-          mean_p * parseFloat(p_evaluation_percentage)
+        let aux = mean_t * parseFloat(t_evaluation_percentage) + mean_p * parseFloat(p_evaluation_percentage)
         grade = aux < tMinGrade ? aux.toFixed(0) + ' (R)' : aux.toFixed(0)
       }
 
-      output.push([
-        csv[csv.headers[0]][i],
-        csv[csv.headers[1]][i],
-        pGrade,
-        tGrade,
-        grade,
-      ])
+      output.push([csv[csv.headers[0]][i], csv[csv.headers[1]][i], pGrade, tGrade, grade])
     }
   },
   orderById(arr) {
@@ -201,8 +181,7 @@ export default {
       len = arr.length
     let line = 1
     for (; line < len; line++) {
-      if (firstLine < arr[line].split(separator).length)
-        return arr.slice(line, len)
+      if (firstLine < arr[line].split(separator).length) return arr.slice(line, len)
     }
     return arr
   },

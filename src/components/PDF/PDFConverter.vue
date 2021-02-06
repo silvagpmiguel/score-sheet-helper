@@ -23,11 +23,7 @@
         </div>
         <div class="pb-1">
           <b-form-group label-size="sm" label-cols-sm="2" label="Docente">
-            <b-form-input
-              size="sm"
-              class="text-center"
-              v-model="teacher"
-            ></b-form-input>
+            <b-form-input size="sm" class="text-center" v-model="teacher"></b-form-input>
           </b-form-group>
         </div>
       </b-container>
@@ -82,8 +78,7 @@ export default {
     readContents() {
       if (this.checkFile()) {
         let reader = new FileReader()
-        if (this.windows)
-          reader.readAsText(new Blob([this.file]), 'windows-1252')
+        if (this.windows) reader.readAsText(new Blob([this.file]), 'windows-1252')
         else reader.readAsText(new Blob([this.file]), 'UTF-8')
         reader.onloadend = (evt) => {
           this.contents = evt.target.result

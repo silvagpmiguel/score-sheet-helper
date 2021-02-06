@@ -6,7 +6,7 @@
     :filename="filename"
     :paginate-elements-by-height="8000"
     pdf-content-width="100%"
-    pdf-format="a3"
+    :pdf-format="pdfFormat"
     pdf-orientation="portrait"
     @hasGenerated="$parent.clear()"
     ref="html2Pdf"
@@ -14,13 +14,7 @@
     <section slot="pdf-content">
       <section class="pdf-item">
         <div class="pt-1 pb-0 pl-1 pr-1">
-          <b-table
-            thead-class="bg-dark text-white"
-            :items="items"
-            :fields="fields"
-            borderless
-            striped
-          >
+          <b-table thead-class="bg-dark text-white" :items="items" :fields="fields" borderless striped>
             <template #thead-top>
               <b-tr>
                 <b-th colspan="12" class="first-header bg-secondary">
@@ -57,6 +51,7 @@ export default {
     filename: String,
     title: String,
     teacher: String,
+    pdfFormat: String,
   },
   methods: {
     generatePDF() {

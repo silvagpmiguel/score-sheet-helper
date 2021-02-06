@@ -1,10 +1,5 @@
 <template>
-  <b-form-input
-    size="sm"
-    @input="triggerUpdateLabel"
-    :value="beforeLabel"
-    class="header"
-  ></b-form-input>
+  <b-form-input size="sm" @input="triggerUpdateLabel" :value="beforeLabel" class="header"></b-form-input>
 </template>
 
 <script>
