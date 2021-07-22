@@ -18,7 +18,7 @@
     "vue": "^2.6.12",
     "vue-html2pdf": "^1.8.0",
     "vue-router": "^3.4.9",
-    "xlsx": "^0.16.9"
+    "xlsx": "^0.17.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.4.0",
