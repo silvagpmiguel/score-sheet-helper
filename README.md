@@ -1,6 +1,6 @@
 # Score Sheet Helper
 
-This project is aimed for teachers with the purpose of building score sheets.
+This project is aimed at teachers, in order to facilitate the construction of score sheets.
 
 ## Project setup
 ```
